@@ -768,21 +768,20 @@ const QUOTES = [
 ];
 
 // ── DATA STORE ────────────────────────────────────────────────────────────────
-// ── DATA: keyed by date string YYYY-MM-DD ──────────────────────────────────────
 const HISTORY = {};
-function todayKey(){return new Date().toISOString().split('T')[0];}
+function todayKey(){
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+}
 function getDay(key){
   if(!HISTORY[key])HISTORY[key]={Fajr:[],Zuhr:[],Asr:[],Maghrib:[],Isha:[]};
   return HISTORY[key];
 }
-// ATT always points to today's data for backwards compat
 function getTodayATT(){return getDay(todayKey());}
-// Proxy: all reads/writes go through today's date
-let ATT_PROXY = new Proxy({},{
-  get:(t,p)=>getTodayATT()[p],
-  set:(t,p,v)=>{getTodayATT()[p]=v;return true;}
-});
-let ATT = ATT_PROXY;
+// Direct helpers — no Proxy needed
+function attGet(salah){return getTodayATT()[salah]||[];}
+function attFind(salah,name){return attGet(salah).find(p=>p.name.toLowerCase()===name.toLowerCase());}
+function attPush(salah,entry){getTodayATT()[salah].push(entry);}
 let todaySelected = null;
 let quranRead = null;
 let qrReady = false;
@@ -962,8 +961,8 @@ function confirmName(){
   errEl.style.display='none';
   ciName=name;
   // Save attendance immediately — name is enough
-  if(!ATT[ciSalah].find(p=>p.name.toLowerCase()===name.toLowerCase())){
-    ATT[ciSalah].push({name,role:'Khadim',streak:1,quran:'',location:'mosque'});
+  if(!attFind(ciSalah,name)){
+    attPush(ciSalah,{name,role:'Khadim',streak:1,quran:'',location:'mosque'});
   }
   renderAllGrids();renderStats();renderLeaderboard();
   // Move to step 2 (quran optional)
@@ -990,7 +989,7 @@ function submitFull(skipQuran){
     if(ruku)parts.push(ruku+' Ruku');
     const quranStr=parts.join(' · ')||'Yes';
     // Update the entry we already saved
-    const entry=ATT[ciSalah].find(p=>p.name.toLowerCase()===ciName.toLowerCase());
+    const entry=attFind(ciSalah,ciName);
     if(entry)entry.quran=quranStr;
     renderAllGrids();renderStats();renderLeaderboard();
   }
@@ -1000,7 +999,7 @@ function submitFull(skipQuran){
   document.getElementById('ci-suc-name').textContent=ciName+' — '+ciSalah+' recorded';
   const chips=document.getElementById('ci-suc-chips');
   chips.innerHTML=`<span class="chip chip-prayer">${ciSalah}</span>`;
-  const entry=ATT[ciSalah].find(p=>p.name.toLowerCase()===ciName.toLowerCase());
+  const entry=attFind(ciSalah,ciName);
   if(entry&&entry.quran)chips.innerHTML+=`<span class="chip chip-quran">Quran: ${entry.quran}</span>`;
 }
 
@@ -1301,11 +1300,11 @@ function submitHP(){
   if(!hpSalah){document.getElementById('hp-prayer-err').style.display='block';return;}
   if(!name){document.getElementById('hp-name-err').style.display='block';return;}
   document.getElementById('hp-name-err').style.display='none';
-  if(!ATT[hpSalah].find(p=>p.name.toLowerCase()===name.toLowerCase())){
-    ATT[hpSalah].push({name,role:'Khadim',streak:1,quran:'',location:'home'});
+  if(!attFind(hpSalah,name)){
+    attPush(hpSalah,{name,role:'Khadim',streak:1,quran:'',location:'home'});
   } else {
-    const entry=ATT[hpSalah].find(p=>p.name.toLowerCase()===name.toLowerCase());
-    entry.location='home';
+    const entry=attFind(hpSalah,name);
+    if(entry)entry.location='home';
   }
   document.getElementById('hp-suc-text').textContent=name+' — '+hpSalah;
   document.getElementById('hp-chip').textContent='Prayed at home';
