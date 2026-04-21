@@ -1,0 +1,655 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Khuddam Mosque — Attendance Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0a0f1a;--s1:#111827;--s2:#1a2235;--s3:#222d42;
+  --gold:#c9a84c;--gold2:#e8c96a;--gold3:#8a6f2e;
+  --green:#2d9e6b;--green2:#3dc87e;
+  --txt:#f0ede6;--txt2:#8a95aa;--txt3:#4a5568;
+  --bdr:rgba(201,168,76,0.15);--bdr2:rgba(201,168,76,0.35);
+  --red:#e24b4a;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
+.geo{position:fixed;inset:0;pointer-events:none;opacity:0.03;z-index:0;
+  background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(201,168,76,0.6) 39px,rgba(201,168,76,0.6) 40px),
+  repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(201,168,76,0.6) 39px,rgba(201,168,76,0.6) 40px)}
+
+/* HEADER */
+header{position:relative;z-index:1;padding:1.5rem 1.5rem 1.25rem;text-align:center;border-bottom:0.5px solid var(--bdr)}
+.logo{font-family:'Amiri',serif;font-size:11px;color:var(--gold3);letter-spacing:4px;text-transform:uppercase;margin-bottom:4px}
+.app-title{font-family:'Amiri',serif;font-size:30px;font-weight:700;color:var(--gold)}
+.app-sub{font-size:11px;color:var(--txt2);margin-top:3px;letter-spacing:1px}
+.date-pill{display:inline-flex;align-items:center;gap:8px;margin-top:12px;background:var(--s2);border:0.5px solid var(--bdr);border-radius:20px;padding:5px 16px;font-size:12px;color:var(--txt2)}
+.live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green2);animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
+
+/* NAV */
+nav{display:flex;justify-content:center;gap:4px;padding:1rem 1rem;position:relative;z-index:1;flex-wrap:wrap}
+.nb{padding:7px 16px;border-radius:20px;border:0.5px solid var(--bdr);background:transparent;color:var(--txt2);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s}
+.nb.on{background:var(--gold);color:#0a0f1a;border-color:var(--gold);font-weight:500}
+.nb:hover:not(.on){border-color:var(--bdr2);color:var(--txt)}
+
+/* VIEWS */
+.view{display:none;padding:1rem 1.25rem 3rem;position:relative;z-index:1;max-width:720px;margin:0 auto}
+.view.on{display:block}
+.sec{font-size:10px;color:var(--txt2);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.sec::after{content:'';flex:1;height:0.5px;background:var(--bdr)}
+
+/* PRAYER CLOCK */
+.prayer-clock{background:var(--s1);border:0.5px solid var(--bdr2);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem;text-align:center}
+.now-salah{font-family:'Amiri',serif;font-size:34px;color:var(--gold);margin-bottom:2px}
+.now-window{font-size:12px;color:var(--txt2);margin-bottom:1rem}
+.salah-pills{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.salah-pill{padding:5px 13px;border-radius:20px;border:0.5px solid var(--bdr);font-size:12px;color:var(--txt3);transition:all 0.3s}
+.salah-pill.cur{background:rgba(201,168,76,0.12);border-color:var(--gold);color:var(--gold);font-weight:500}
+.salah-pill.done{background:rgba(45,158,107,0.08);border-color:rgba(45,158,107,0.3);color:var(--green2)}
+.countdown{font-size:12px;color:var(--txt2);margin-top:10px}
+.countdown span{color:var(--gold);font-weight:500}
+
+/* SALAH GRID */
+.salah-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:1.25rem}
+.salah-card{background:var(--s1);border:0.5px solid var(--bdr);border-radius:12px;padding:1rem;text-align:center;cursor:pointer;transition:all 0.2s;position:relative;overflow:hidden}
+.salah-card:hover{border-color:var(--bdr2);transform:translateY(-2px)}
+.salah-card.active-s{border-color:var(--gold)}
+.salah-card.active-s::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--gold)}
+.sc-name{font-family:'Amiri',serif;font-size:16px;color:var(--gold);margin-bottom:2px}
+.sc-time{font-size:10px;color:var(--txt2);margin-bottom:6px}
+.sc-count{font-size:22px;font-weight:500}
+.sc-lbl{font-size:10px;color:var(--txt3);text-transform:uppercase;letter-spacing:1px}
+.sc-qcount{font-size:10px;color:var(--green2);margin-top:3px}
+.sc-bar{position:absolute;bottom:0;left:0;height:2px;background:var(--gold);opacity:0.4;transition:width 0.5s}
+
+/* QR PANEL */
+.qr-panel{background:var(--s1);border:0.5px solid var(--bdr2);border-radius:16px;padding:1.5rem;margin-bottom:1.25rem}
+.qr-inner{display:flex;gap:1.5rem;align-items:flex-start;flex-wrap:wrap;margin-bottom:1rem}
+.qr-frame{background:white;border-radius:10px;padding:10px;width:128px;height:128px;flex-shrink:0;display:flex;align-items:center;justify-content:center;position:relative}
+.qr-badge{position:absolute;bottom:-9px;left:50%;transform:translateX(-50%);background:var(--gold);color:#0a0f1a;font-size:9px;font-weight:600;padding:2px 10px;border-radius:10px;white-space:nowrap}
+.qr-right{flex:1;min-width:160px}
+.qr-title{font-family:'Amiri',serif;font-size:18px;color:var(--gold);margin-bottom:4px}
+.qr-desc{font-size:12px;color:var(--txt2);line-height:1.65;margin-bottom:10px}
+.qr-url{font-size:10px;background:var(--s2);border:0.5px solid var(--bdr);border-radius:7px;padding:7px 10px;color:var(--txt3);font-family:monospace;word-break:break-all;margin-bottom:7px}
+.url-note{font-size:11px;color:var(--green2);display:flex;align-items:center;gap:5px}
+.url-note::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--green2);flex-shrink:0}
+.how-works{background:var(--s2);border-radius:10px;padding:12px;font-size:12px;color:var(--txt2);line-height:1.7}
+.how-works strong{color:var(--txt);font-weight:500}
+
+/* TIME TABLE */
+.time-tbl{width:100%;border-collapse:collapse}
+.time-tbl td{padding:9px 14px;font-size:13px;border-bottom:0.5px solid var(--bdr)}
+.time-tbl tr:last-child td{border-bottom:none}
+.tname{font-family:'Amiri',serif;font-size:15px;color:var(--gold)}
+.twin{color:var(--txt2)}
+.tcur{background:rgba(201,168,76,0.05)}
+
+/* CHECK-IN FORM */
+.form-card{background:var(--s1);border:0.5px solid var(--bdr2);border-radius:16px;padding:1.5rem;margin-bottom:1rem}
+.det-banner{display:flex;align-items:center;gap:10px;background:rgba(201,168,76,0.08);border:0.5px solid var(--bdr2);border-radius:10px;padding:10px 14px;margin-bottom:1.25rem}
+.det-icon{width:32px;height:32px;border-radius:50%;background:rgba(201,168,76,0.15);border:1px solid var(--gold3);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px}
+.det-text{font-size:13px;color:var(--txt2)}.det-text strong{color:var(--gold)}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:11px;color:var(--txt2);margin-bottom:5px;letter-spacing:0.5px;text-transform:uppercase}
+.field input,.field select,.field textarea{width:100%;background:var(--s2);border:0.5px solid var(--bdr);color:var(--txt);border-radius:8px;padding:9px 12px;font-family:'Outfit',sans-serif;font-size:13px;outline:none;transition:border-color 0.2s;-webkit-appearance:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--gold3)}
+.field select option{background:var(--s1)}
+.field textarea{resize:vertical;min-height:60px;line-height:1.5}
+.quran-box{background:var(--s2);border:0.5px solid rgba(45,158,107,0.25);border-radius:12px;padding:1rem;margin-bottom:14px}
+.quran-lbl{font-size:11px;color:var(--green2);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:6px}
+.quran-lbl::before{content:'';width:3px;height:12px;background:var(--green2);border-radius:2px}
+.quran-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.toggle-row{display:flex;gap:6px;flex-wrap:wrap}
+.tog{padding:7px 14px;border-radius:8px;border:0.5px solid var(--bdr);background:transparent;color:var(--txt2);font-size:12px;cursor:pointer;font-family:'Outfit',sans-serif;transition:all 0.2s}
+.tog.on{background:rgba(45,158,107,0.12);border-color:rgba(45,158,107,0.4);color:var(--green2)}
+.btn-primary{width:100%;padding:13px;background:var(--gold);color:#0a0f1a;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-size:14px;font-weight:500;cursor:pointer;transition:all 0.2s}
+.btn-primary:hover{background:var(--gold2)}.btn-primary:active{transform:scale(0.98)}
+.err-msg{font-size:12px;color:var(--red);margin-top:4px;display:none}
+
+/* SUCCESS */
+.success-card{background:var(--s1);border:0.5px solid rgba(45,158,107,0.3);border-radius:16px;padding:2rem;text-align:center;display:none}
+.suc-ring{width:60px;height:60px;border-radius:50%;border:2px solid var(--green2);background:rgba(45,158,107,0.1);margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:26px;color:var(--green2)}
+.suc-title{font-family:'Amiri',serif;font-size:24px;color:var(--green2);margin-bottom:6px}
+.suc-sub{font-size:13px;color:var(--txt2);line-height:1.6}
+.suc-tags{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}
+.suc-tag{padding:4px 14px;border-radius:20px;font-size:11px}
+.suc-tag.prayer{background:rgba(201,168,76,0.1);color:var(--gold);border:0.5px solid var(--gold3)}
+.suc-tag.quran{background:rgba(45,158,107,0.1);color:var(--green2);border:0.5px solid rgba(45,158,107,0.3)}
+.btn-ghost{margin-top:1rem;padding:9px 24px;background:transparent;border:0.5px solid var(--bdr2);color:var(--txt2);border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:13px}
+.btn-ghost:hover{color:var(--txt);border-color:var(--gold)}
+
+/* ATTENDEE LIST */
+.att-list{display:flex;flex-direction:column;gap:7px;max-height:340px;overflow-y:auto}
+.att-row{display:flex;align-items:center;gap:10px;background:var(--s1);border:0.5px solid var(--bdr);border-radius:9px;padding:9px 12px;animation:si 0.25s ease}
+@keyframes si{from{opacity:0;transform:translateY(-5px)}to{opacity:1;transform:translateY(0)}}
+.av{width:34px;height:34px;border-radius:50%;background:var(--s2);border:1.5px solid var(--gold3);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:var(--gold);flex-shrink:0}
+.att-info{flex:1}
+.att-name{font-size:13px;font-weight:500}
+.att-meta{font-size:11px;color:var(--txt2)}
+.att-quran{font-size:11px;color:var(--green2);padding:2px 8px;background:rgba(45,158,107,0.08);border-radius:10px;border:0.5px solid rgba(45,158,107,0.2);flex-shrink:0}
+.streak-badge{font-size:11px;color:var(--gold);background:rgba(201,168,76,0.08);border:0.5px solid var(--gold3);border-radius:10px;padding:2px 8px;flex-shrink:0}
+.empty-state{text-align:center;padding:2rem;color:var(--txt3);font-size:13px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:1.25rem}
+.stat-card{background:var(--s1);border:0.5px solid var(--bdr);border-radius:13px;padding:1.1rem;text-align:center}
+.stat-num{font-size:28px;font-weight:500;color:var(--gold)}
+.stat-lbl{font-size:11px;color:var(--txt2);margin-top:3px}
+.chart-wrap{background:var(--s1);border:0.5px solid var(--bdr);border-radius:13px;padding:1.25rem;margin-bottom:1.25rem}
+.chart-bars{display:flex;align-items:flex-end;gap:6px;height:90px;margin-top:12px}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px}
+.bar{width:100%;border-radius:4px 4px 0 0;background:var(--gold3);transition:height 0.6s ease;min-height:4px}
+.bar-lbl{font-size:10px;color:var(--txt3)}
+.bar-val{font-size:10px;color:var(--txt2)}
+
+/* LEADERBOARD */
+.rank-row{display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--s1);border:0.5px solid var(--bdr);border-radius:9px;margin-bottom:7px}
+.rank-num{width:22px;text-align:center;font-size:12px;color:var(--txt3)}
+.rank-num.top{color:var(--gold);font-weight:500}
+.rank-info{flex:1}
+.rank-name{font-size:13px;font-weight:500}
+.rank-meta{font-size:11px;color:var(--txt2)}
+.rank-streak{font-size:12px;color:var(--gold)}
+
+/* NOTICE BOARD */
+.notice-card{background:var(--s1);border:0.5px solid var(--bdr);border-radius:13px;padding:1.1rem;margin-bottom:8px}
+.notice-tag{display:inline-block;padding:2px 10px;border-radius:20px;font-size:10px;margin-bottom:7px}
+.tag-info{background:rgba(55,138,221,0.1);color:#85b7eb;border:0.5px solid rgba(55,138,221,0.25)}
+.tag-reminder{background:rgba(201,168,76,0.1);color:var(--gold);border:0.5px solid rgba(201,168,76,0.25)}
+.tag-event{background:rgba(45,158,107,0.1);color:var(--green2);border:0.5px solid rgba(45,158,107,0.25)}
+.notice-title{font-weight:500;font-size:14px;margin-bottom:4px}
+.notice-body{font-size:12px;color:var(--txt2);line-height:1.65}
+.notice-date{font-size:11px;color:var(--txt3);margin-top:6px}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:2px}
+</style>
+</head>
+<body>
+<div class="geo"></div>
+
+<header>
+  <div class="logo">Khuddam Mosque</div>
+  <div class="app-title">Attendance Portal</div>
+  <div class="app-sub">One QR · Auto-detects prayer · Tracks Quran reading</div>
+  <div class="date-pill">
+    <span class="live-dot"></span>
+    <span id="greg-date"></span>
+    &nbsp;·&nbsp;
+    <span id="hijri-display">Shawwal 1446 AH</span>
+  </div>
+</header>
+
+<nav>
+  <button class="nb on"  onclick="sv('today',this)">Today</button>
+  <button class="nb"     onclick="sv('qr',this)">QR Code</button>
+  <button class="nb"     onclick="sv('checkin',this)">Check In</button>
+  <button class="nb"     onclick="sv('stats',this)">Stats</button>
+  <button class="nb"     onclick="sv('board',this)">Notice Board</button>
+</nav>
+
+<!-- ===== TODAY ===== -->
+<div class="view on" id="v-today">
+  <p class="sec">Current prayer window</p>
+  <div class="prayer-clock">
+    <div style="font-size:11px;color:var(--txt2);margin-bottom:4px"><span class="live-dot"></span> Now active</div>
+    <div class="now-salah" id="cur-salah-name">—</div>
+    <div class="now-window" id="cur-window">—</div>
+    <div class="salah-pills" id="salah-pills-today"></div>
+    <div class="countdown">Next: <span id="next-name">—</span> in <span id="next-in">—</span></div>
+  </div>
+
+  <p class="sec">Attendance — <span id="today-salah-label">select a prayer</span></p>
+  <div class="salah-grid" id="today-salah-grid"></div>
+  <div class="att-list" id="today-att-list"><div class="empty-state">Select a prayer above to view attendees</div></div>
+</div>
+
+<!-- ===== QR ===== -->
+<div class="view" id="v-qr">
+  <p class="sec">The permanent QR code</p>
+  <div class="qr-panel">
+    <div class="qr-inner">
+      <div class="qr-frame">
+        <div id="qr-render"></div>
+        <div class="qr-badge" id="qr-badge">loading...</div>
+      </div>
+      <div class="qr-right">
+        <div class="qr-title">One QR, forever</div>
+        <div class="qr-desc">Print this and place it in the mosque. The URL never changes. The app detects which prayer it is automatically from the time of day when someone scans.</div>
+        <div class="qr-url">https://mosque-attendance.github.io/checkin</div>
+        <div class="url-note">URL is permanent — print once, never reprint</div>
+      </div>
+    </div>
+    <div class="how-works">
+      <strong>How it works:</strong> Each Salah has a time window. When a Khadim scans, the app reads the device clock, finds the active prayer, and pre-fills the form. No new QR per prayer, no admin action needed. They can still change the prayer if catching up a missed one.
+    </div>
+  </div>
+
+  <p class="sec">Prayer time windows</p>
+  <div style="background:var(--s1);border:0.5px solid var(--bdr);border-radius:13px;overflow:hidden;margin-bottom:1.25rem">
+    <table class="time-tbl" id="time-tbl"></table>
+  </div>
+
+  <p class="sec" style="margin-top:1.5rem">Attendance by prayer today</p>
+  <div class="salah-grid" id="qr-salah-grid"></div>
+</div>
+
+<!-- ===== CHECK IN ===== -->
+<div class="view" id="v-checkin">
+  <div class="form-card" id="form-wrap">
+    <p class="sec" style="margin-bottom:1rem">Attendance check-in</p>
+    <div class="det-banner">
+      <div class="det-icon">&#9650;</div>
+      <div class="det-text">Prayer auto-detected: <strong id="det-salah">—</strong>&nbsp;&nbsp;<span id="det-time" style="font-size:11px"></span></div>
+    </div>
+    <div class="field">
+      <label>Full name</label>
+      <input type="text" id="f-name" placeholder="e.g. Ahmed Khan" autocomplete="name">
+      <div class="err-msg" id="name-err">Please enter your name</div>
+    </div>
+    <div class="field">
+      <label>Role</label>
+      <select id="f-role">
+        <option>Khadim</option>
+        <option>Nazim</option>
+        <option>Qaid</option>
+        <option>Waqar-e-Amal</option>
+        <option>Mu'allim</option>
+        <option>Khuddam-ul-Ahmadiyya</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>Prayer (auto-filled — editable)</label>
+      <select id="f-salah">
+        <option>Fajr</option>
+        <option>Zuhr</option>
+        <option>Asr</option>
+        <option>Maghrib</option>
+        <option>Isha</option>
+      </select>
+    </div>
+
+    <div class="quran-box">
+      <div class="quran-lbl">Quran reading today</div>
+      <div class="field" style="margin-bottom:10px">
+        <label>Did you read Quran today?</label>
+        <div class="toggle-row">
+          <button class="tog" onclick="setQ('yes',this)">Yes, I did</button>
+          <button class="tog" onclick="setQ('partial',this)">A little</button>
+          <button class="tog" onclick="setQ('no',this)">Not yet</button>
+        </div>
+      </div>
+      <div id="quran-details" style="display:none">
+        <div class="quran-grid">
+          <div class="field" style="margin-bottom:0">
+            <label>Pages read</label>
+            <input type="number" id="f-pages" placeholder="e.g. 5" min="0" max="604">
+          </div>
+          <div class="field" style="margin-bottom:0">
+            <label>Ruku / sections</label>
+            <input type="number" id="f-ruku" placeholder="e.g. 2" min="0">
+          </div>
+        </div>
+        <div class="field" style="margin-top:8px;margin-bottom:0">
+          <label>Surah or note (optional)</label>
+          <input type="text" id="f-surah" placeholder="e.g. Al-Baqarah, verse 255">
+        </div>
+      </div>
+    </div>
+
+    <button class="btn-primary" onclick="submitForm()">Confirm Attendance</button>
+  </div>
+
+  <div class="success-card" id="success-wrap">
+    <div class="suc-ring">&#10003;</div>
+    <div class="suc-title">Jazakallah Khair!</div>
+    <div class="suc-sub" id="suc-text">Attendance recorded</div>
+    <div class="suc-tags" id="suc-tags"></div>
+    <button class="btn-ghost" onclick="resetForm()">Check in again</button>
+  </div>
+</div>
+
+<!-- ===== STATS ===== -->
+<div class="view" id="v-stats">
+  <p class="sec">This week at a glance</p>
+  <div class="stats-grid">
+    <div class="stat-card"><div class="stat-num" id="st-total">0</div><div class="stat-lbl">Total attendances</div></div>
+    <div class="stat-card"><div class="stat-num" id="st-avg">0</div><div class="stat-lbl">Avg per Salah</div></div>
+    <div class="stat-card"><div class="stat-num" id="st-top">—</div><div class="stat-lbl">Most attended</div></div>
+    <div class="stat-card"><div class="stat-num" id="st-quran">0</div><div class="stat-lbl">Read Quran today</div></div>
+  </div>
+
+  <div class="chart-wrap">
+    <p class="sec" style="margin-bottom:0">7-day attendance</p>
+    <div class="chart-bars" id="weekly-bars"></div>
+  </div>
+
+  <p class="sec">Leaderboard — top Khudam</p>
+  <div id="leaderboard"></div>
+</div>
+
+<!-- ===== NOTICE BOARD ===== -->
+<div class="view" id="v-board">
+  <p class="sec">Announcements</p>
+  <div id="notices"></div>
+</div>
+
+<script>
+// ── PRAYER TIMES (24h, adjust to your mosque location) ──────────────────────
+const SALAHS = [
+  {name:'Fajr',    start:[4,45],  end:[6,30],  label:'4:45 – 6:30 AM'},
+  {name:'Zuhr',    start:[13,0],  end:[14,45], label:'1:00 – 2:45 PM'},
+  {name:'Asr',     start:[15,45], end:[18,15], label:'3:45 – 6:15 PM'},
+  {name:'Maghrib', start:[19,30], end:[20,45], label:'7:30 – 8:45 PM'},
+  {name:'Isha',    start:[21,0],  end:[23,59], label:'9:00 PM – midnight'},
+];
+
+// ── DATA STORE (resets on page refresh — backend needed for persistence) ────
+let ATT = {Fajr:[],Zuhr:[],Asr:[],Maghrib:[],Isha:[]};
+let todaySelected = null;
+let quranRead = null;
+let qrReady = false;
+
+// ── SEED DATA ───────────────────────────────────────────────────────────────
+const SEED = [
+  {name:'Ahmed Khan',    role:'Khadim',            streak:14, quran:'6 pages'},
+  {name:'Usman Ali',     role:'Nazim',             streak:21, quran:''},
+  {name:'Ibrahim Malik', role:'Qaid',              streak:7,  quran:'1 Ruku'},
+  {name:'Yusuf Raza',    role:'Khadim',            streak:9,  quran:'10 pages'},
+  {name:'Bilal Sheikh',  role:'Waqar-e-Amal',      streak:18, quran:''},
+  {name:'Tariq Hassan',  role:'Khadim',            streak:5,  quran:'3 pages'},
+  {name:'Hamza Chaudhry',role:'Nazim',             streak:3,  quran:''},
+];
+function seedData(){
+  ATT.Fajr    = [SEED[0],SEED[1],SEED[2],SEED[5]];
+  ATT.Zuhr    = [SEED[1],SEED[3],SEED[4]];
+  ATT.Asr     = [SEED[0],SEED[1],SEED[6]];
+  ATT.Maghrib = [SEED[2],SEED[5]];
+  ATT.Isha    = [SEED[0],SEED[1],SEED[3],SEED[4],SEED[6]];
+}
+
+// ── HELPERS ──────────────────────────────────────────────────────────────────
+function initials(n){return n.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}
+function curMins(){const n=new Date();return n.getHours()*60+n.getMinutes()}
+function getCurrentSalah(){
+  const m=curMins();
+  for(const s of SALAHS){
+    if(m>=s.start[0]*60+s.start[1] && m<s.end[0]*60+s.end[1]) return s;
+  }
+  return SALAHS[4]; // default to Isha if outside all windows
+}
+function getNextSalah(){
+  const idx=SALAHS.findIndex(s=>s.name===getCurrentSalah().name);
+  return SALAHS[(idx+1)%SALAHS.length];
+}
+function minsUntilNext(){
+  const next=getNextSalah();
+  let diff=next.start[0]*60+next.start[1]-curMins();
+  if(diff<0)diff+=24*60;
+  return diff;
+}
+function fmtMins(m){const h=Math.floor(m/60),mm=m%60;return h>0?`${h}h ${mm}m`:`${mm}m`}
+function maxAtt(){return Math.max(1,...SALAHS.map(s=>ATT[s.name].length))}
+
+// ── INIT DATE ────────────────────────────────────────────────────────────────
+function initDate(){
+  const d=new Date();
+  document.getElementById('greg-date').textContent=d.toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+}
+
+// ── PRAYER CLOCK ─────────────────────────────────────────────────────────────
+function renderClock(){
+  const cur=getCurrentSalah(), next=getNextSalah(), diff=minsUntilNext();
+  document.getElementById('cur-salah-name').textContent=cur.name;
+  document.getElementById('cur-window').textContent=cur.label;
+  document.getElementById('next-name').textContent=next.name;
+  document.getElementById('next-in').textContent=fmtMins(diff);
+  const curIdx=SALAHS.findIndex(s=>s.name===cur.name);
+  document.getElementById('salah-pills-today').innerHTML=SALAHS.map((s,i)=>{
+    let c='salah-pill';
+    if(s.name===cur.name)c+=' cur';
+    else if(i<curIdx)c+=' done';
+    return `<span class="${c}">${s.name}</span>`;
+  }).join('');
+  const b=document.getElementById('qr-badge');
+  if(b)b.textContent=cur.name;
+}
+
+// ── TIME TABLE ───────────────────────────────────────────────────────────────
+function renderTimeTable(){
+  const cur=getCurrentSalah();
+  document.getElementById('time-tbl').innerHTML=SALAHS.map(s=>{
+    const isCur=s.name===cur.name;
+    return `<tr class="${isCur?'tcur':''}">
+      <td class="tname" style="padding-left:16px">${s.name}</td>
+      <td class="twin">${s.label}</td>
+      <td style="text-align:right;padding-right:16px">${isCur?'<span style="color:var(--green2);font-size:12px">&#9679; Now</span>':'<span style="color:var(--txt3);font-size:12px">—</span>'}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ── SALAH GRID ────────────────────────────────────────────────────────────────
+function renderSalahGrid(containerId, onClickFn, activeSalah){
+  const g=document.getElementById(containerId);
+  if(!g)return;
+  const mx=maxAtt();
+  g.innerHTML=SALAHS.map(s=>{
+    const cnt=ATT[s.name].length;
+    const qCnt=ATT[s.name].filter(p=>p.quran).length;
+    const pct=Math.round(cnt/mx*100);
+    const isAct=s.name===activeSalah;
+    return `<div class="salah-card ${isAct?'active-s':''}" onclick="${onClickFn}('${s.name}')">
+      <div class="sc-name">${s.name}</div>
+      <div class="sc-time">${s.label.split('–')[0].trim()}</div>
+      <div class="sc-count">${cnt}</div>
+      <div class="sc-lbl">Khudam</div>
+      ${qCnt?`<div class="sc-qcount">${qCnt} read Quran</div>`:'<div style="height:14px"></div>'}
+      <div class="sc-bar" style="width:${pct}%"></div>
+    </div>`;
+  }).join('');
+}
+
+// ── ATTENDEE LIST ─────────────────────────────────────────────────────────────
+function renderAttList(salahName, containerId){
+  const el=document.getElementById(containerId);
+  if(!el)return;
+  const ppl=ATT[salahName]||[];
+  if(!ppl.length){el.innerHTML='<div class="empty-state">No attendees recorded yet for '+salahName+'</div>';return;}
+  el.innerHTML=ppl.map(p=>`
+    <div class="att-row">
+      <div class="av">${initials(p.name)}</div>
+      <div class="att-info">
+        <div class="att-name">${p.name}</div>
+        <div class="att-meta">${p.role}</div>
+      </div>
+      ${p.streak?`<div class="streak-badge">&#9733; ${p.streak}d</div>`:''}
+      ${p.quran?`<div class="att-quran">${p.quran}</div>`:''}
+    </div>`).join('');
+}
+
+// ── TODAY VIEW ────────────────────────────────────────────────────────────────
+function selectTodaySalah(name){
+  todaySelected=name;
+  document.getElementById('today-salah-label').textContent=name;
+  renderSalahGrid('today-salah-grid','selectTodaySalah',name);
+  renderAttList(name,'today-att-list');
+}
+
+// ── QR VIEW ──────────────────────────────────────────────────────────────────
+function initQR(){
+  if(qrReady)return;
+  const box=document.getElementById('qr-render');
+  box.innerHTML='';
+  try{
+    new QRCode(box,{
+      text:'https://mosque-attendance.github.io/checkin',
+      width:104,height:104,
+      colorDark:'#0a0f1a',colorLight:'#ffffff',
+      correctLevel:QRCode.CorrectLevel.M
+    });
+    qrReady=true;
+  }catch(e){box.innerHTML='<div style="font-size:10px;color:#888;text-align:center;padding:8px">QR code</div>';}
+}
+
+// ── CHECK-IN FORM ─────────────────────────────────────────────────────────────
+function setDetected(){
+  const cur=getCurrentSalah();
+  document.getElementById('det-salah').textContent=cur.name;
+  document.getElementById('det-time').textContent=cur.label;
+  document.getElementById('f-salah').value=cur.name;
+}
+
+function setQ(val,el){
+  quranRead=val;
+  document.querySelectorAll('.tog').forEach(t=>t.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('quran-details').style.display=(val==='yes'||val==='partial')?'block':'none';
+}
+
+function submitForm(){
+  const name=document.getElementById('f-name').value.trim();
+  const errEl=document.getElementById('name-err');
+  if(!name){errEl.style.display='block';return;}
+  errEl.style.display='none';
+  const role=document.getElementById('f-role').value;
+  const salah=document.getElementById('f-salah').value;
+  const pages=document.getElementById('f-pages').value;
+  const ruku=document.getElementById('f-ruku').value;
+  const surah=document.getElementById('f-surah').value.trim();
+  let quranStr='';
+  if(quranRead==='yes'||quranRead==='partial'){
+    const parts=[];
+    if(pages)parts.push(pages+' pages');
+    if(ruku)parts.push(ruku+' Ruku');
+    if(surah)parts.push(surah);
+    quranStr=parts.join(' · ')||'Yes';
+  }
+  if(!ATT[salah].find(p=>p.name.toLowerCase()===name.toLowerCase())){
+    ATT[salah].push({name,role,streak:1,quran:quranStr});
+  }
+  document.getElementById('suc-text').textContent=`${name} — ${salah} recorded`;
+  const tags=document.getElementById('suc-tags');
+  tags.innerHTML=`<span class="suc-tag prayer">${salah}</span>`;
+  if(quranStr)tags.innerHTML+=`<span class="suc-tag quran">Quran: ${quranStr}</span>`;
+  document.getElementById('form-wrap').style.display='none';
+  document.getElementById('success-wrap').style.display='block';
+  renderAllGrids();
+  renderStats();
+  renderLeaderboard();
+}
+
+function resetForm(){
+  ['f-name','f-pages','f-ruku','f-surah'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('quran-details').style.display='none';
+  document.querySelectorAll('.tog').forEach(t=>t.classList.remove('on'));
+  document.getElementById('name-err').style.display='none';
+  quranRead=null;
+  setDetected();
+  document.getElementById('form-wrap').style.display='block';
+  document.getElementById('success-wrap').style.display='none';
+}
+
+// ── STATS ─────────────────────────────────────────────────────────────────────
+function renderStats(){
+  const totals=SALAHS.map(s=>ATT[s.name].length);
+  const total=totals.reduce((a,b)=>a+b,0);
+  const avg=Math.round(total/SALAHS.length);
+  const maxIdx=totals.indexOf(Math.max(...totals));
+  const quranToday=Object.values(ATT).flat().filter(p=>p.quran).length;
+  document.getElementById('st-total').textContent=total;
+  document.getElementById('st-avg').textContent=avg;
+  document.getElementById('st-top').textContent=total>0?SALAHS[maxIdx].name:'—';
+  document.getElementById('st-quran').textContent=quranToday;
+  renderWeeklyChart();
+}
+
+function renderWeeklyChart(){
+  const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const vals=[8,12,6,15,10,18,14];
+  const mx=Math.max(...vals);
+  document.getElementById('weekly-bars').innerHTML=days.map((d,i)=>`
+    <div class="bar-wrap">
+      <div class="bar-val">${vals[i]}</div>
+      <div class="bar" style="height:${Math.round(vals[i]/mx*76)+6}px;background:${i===6?'var(--gold)':'var(--gold3)'}"></div>
+      <div class="bar-lbl">${d}</div>
+    </div>`).join('');
+}
+
+function renderLeaderboard(){
+  const all=[];
+  SALAHS.forEach(s=>ATT[s.name].forEach(p=>{
+    const ex=all.find(a=>a.name===p.name);
+    if(ex){ex.sessions++;if(p.quran&&!ex.quran)ex.quran=p.quran;}
+    else all.push({name:p.name,role:p.role,sessions:1,streak:p.streak||1,quran:p.quran||''});
+  }));
+  all.sort((a,b)=>b.sessions-a.sessions||b.streak-a.streak);
+  const top=all.slice(0,6);
+  document.getElementById('leaderboard').innerHTML=top.length?top.map((p,i)=>`
+    <div class="rank-row">
+      <div class="rank-num ${i<3?'top':''}">${i===0?'★':i+1}</div>
+      <div class="av" style="width:30px;height:30px;font-size:10px">${initials(p.name)}</div>
+      <div class="rank-info">
+        <div class="rank-name">${p.name}</div>
+        <div class="rank-meta">${p.sessions} prayers · ${p.role}${p.quran?' · Quran: '+p.quran:''}</div>
+      </div>
+      <div class="rank-streak">&#9733; ${p.streak}d</div>
+    </div>`).join(''):'<div class="empty-state">No data yet</div>';
+}
+
+// ── NOTICE BOARD ──────────────────────────────────────────────────────────────
+function renderNotices(){
+  const notices=[
+    {tag:'event',   tagLabel:'Event',    title:'Monthly Ijtema — Saturday 26th April',     body:'All Khudam are requested to attend the monthly Ijtema after Fajr. Refreshments will be provided. Attendance is compulsory for all local Khudam.',          date:'Posted 2 days ago'},
+    {tag:'reminder',tagLabel:'Reminder', title:'Daily Salah target: all 5 prayers',         body:'The Qaid has set a weekly target of attending all 5 daily prayers. Your streaks are tracked automatically through the attendance system.',                   date:'Posted 4 days ago'},
+    {tag:'info',    tagLabel:'Info',     title:'New QR check-in system now live',            body:'Attendance is now recorded by scanning the QR code at the entrance. If you forget to scan, use the Check In tab and select the correct prayer manually.', date:'Posted 1 week ago'},
+    {tag:'reminder',tagLabel:'Reminder', title:'Quran reading — log your daily tilawat',    body:'The check-in form now includes a section to log your Quran reading. Please record your pages and Ruku each day so your tilawat progress can be tracked.', date:'Posted 1 week ago'},
+    {tag:'event',   tagLabel:'Event',    title:'Waqar-e-Amal this Sunday after Fajr',       body:'All Khudam are invited to participate in this Sunday\'s Waqar-e-Amal (voluntary community service). Meet at the mosque entrance after Fajr prayer.',      date:'Posted 10 days ago'},
+  ];
+  document.getElementById('notices').innerHTML=notices.map(n=>`
+    <div class="notice-card">
+      <span class="notice-tag tag-${n.tag}">${n.tagLabel}</span>
+      <div class="notice-title">${n.title}</div>
+      <div class="notice-body">${n.body}</div>
+      <div class="notice-date">${n.date}</div>
+    </div>`).join('');
+}
+
+// ── RENDER ALL GRIDS ──────────────────────────────────────────────────────────
+function renderAllGrids(){
+  renderSalahGrid('today-salah-grid','selectTodaySalah',todaySelected);
+  renderSalahGrid('qr-salah-grid','selectTodaySalah',todaySelected);
+  if(todaySelected)renderAttList(todaySelected,'today-att-list');
+}
+
+// ── NAV ───────────────────────────────────────────────────────────────────────
+function sv(id,el){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  document.querySelectorAll('.nb').forEach(b=>b.classList.remove('on'));
+  document.getElementById('v-'+id).classList.add('on');
+  el.classList.add('on');
+  if(id==='qr'){renderTimeTable();initQR();renderSalahGrid('qr-salah-grid','selectTodaySalah',todaySelected);}
+  if(id==='stats'){renderStats();renderLeaderboard();}
+}
+
+// ── BOOTSTRAP ─────────────────────────────────────────────────────────────────
+initDate();
+seedData();
+renderClock();
+const cur=getCurrentSalah();
+todaySelected=cur.name;
+renderAllGrids();
+renderAttList(cur.name,'today-att-list');
+document.getElementById('today-salah-label').textContent=cur.name;
+setDetected();
+renderNotices();
+setInterval(renderClock, 30000);
+</script>
+</body>
+</html>
