@@ -6,6 +6,7 @@
 <title>Khuddam Attendance Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -310,6 +311,23 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
 </head>
 <body>
 <div class="geo"></div>
+
+<!-- SUPABASE CONFIG BANNER (hidden once keys are set) -->
+<div id="sb-banner" style="background:#1a0f00;border-bottom:1px solid rgba(201,168,76,0.4);padding:10px 16px;text-align:center;font-size:12px;color:#c9a84c;position:relative;z-index:10;display:none">
+  &#9888; Add your Supabase keys to enable real-time sync across devices. 
+  <a href="#" onclick="document.getElementById('sb-setup').style.display='block';return false" style="color:#e8c96a;text-decoration:underline;margin-left:6px">Setup →</a>
+</div>
+<div id="sb-setup" style="display:none;background:#0a0f1a;border-bottom:1px solid rgba(201,168,76,0.3);padding:1rem 1.25rem;position:relative;z-index:10">
+  <div style="max-width:500px;margin:0 auto">
+    <div style="font-family:'Amiri',serif;font-size:16px;color:var(--gold);margin-bottom:8px">Connect to Supabase</div>
+    <div style="font-size:12px;color:var(--txt2);margin-bottom:10px">Enter your Supabase project URL and anon key — free at supabase.com</div>
+    <input id="sb-url-input" type="text" placeholder="https://xxxx.supabase.co" style="width:100%;background:var(--s2);border:0.5px solid var(--bdr);color:var(--txt);border-radius:8px;padding:8px 12px;font-size:12px;outline:none;margin-bottom:6px;font-family:'Outfit',sans-serif">
+    <input id="sb-key-input" type="text" placeholder="your-anon-key" style="width:100%;background:var(--s2);border:0.5px solid var(--bdr);color:var(--txt);border-radius:8px;padding:8px 12px;font-size:12px;outline:none;margin-bottom:8px;font-family:'Outfit',sans-serif">
+    <button onclick="initSupabase()" style="padding:8px 20px;background:var(--gold);color:#0a0f1a;border:none;border-radius:8px;font-family:'Outfit',sans-serif;font-size:13px;font-weight:500;cursor:pointer">Connect</button>
+    <span id="sb-connect-status" style="font-size:12px;color:var(--txt2);margin-left:10px"></span>
+  </div>
+</div>
+
 
 
 
@@ -962,7 +980,7 @@ function confirmName(){
   ciName=name;
   // Save attendance immediately — name is enough
   if(!attFind(ciSalah,name)){
-    attPush(ciSalah,{name,role:'Khadim',streak:1,quran:'',location:'mosque'});
+    attPushWithSync(ciSalah,{name,role:'Khadim',streak:1,quran:'',location:'mosque'});
   }
   renderAllGrids();renderStats();renderLeaderboard();
   // Move to step 2 (quran optional)
@@ -1252,7 +1270,7 @@ function submitPast(){
   errEl.style.display='none';
   const day=getDay(dateVal);
   if(!day[salah].find(p=>p.name.toLowerCase()===name.toLowerCase())){
-    day[salah].push({name,role:'Khadim',streak:1,quran:'',location:pastLoc});
+    attPushWithSync(salah,{name,role:'Khadim',streak:1,quran:'',location:pastLoc},dateVal);
   }
   document.getElementById('past-name').value='';
   renderPastHistory();
@@ -1301,7 +1319,7 @@ function submitHP(){
   if(!name){document.getElementById('hp-name-err').style.display='block';return;}
   document.getElementById('hp-name-err').style.display='none';
   if(!attFind(hpSalah,name)){
-    attPush(hpSalah,{name,role:'Khadim',streak:1,quran:'',location:'home'});
+    attPushWithSync(hpSalah,{name,role:'Khadim',streak:1,quran:'',location:'home'});
   } else {
     const entry=attFind(hpSalah,name);
     if(entry)entry.location='home';
@@ -1339,6 +1357,146 @@ function sv(id,el){
   if(id==='stats'){renderStats();renderLeaderboard();renderLiveNamesTable();}
 }
 
+// ── SUPABASE INTEGRATION ─────────────────────────────────────────────────────
+let sbClient = null;
+let sbConnected = false;
+let realtimeChannel = null;
+
+// Supabase config — fill these in after creating your project
+// OR leave blank and use the setup banner
+const SB_URL = 'https://uzoipvbxdgvxluzwcejt.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InV6b2lwdmJ4ZGd2eGx1endjZWp0Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY3NjAzNTMsImV4cCI6MjA5MjMzNjM1M30.7v4E8nh81jxW-ewoIBFM9AGiSECzekRntUQfSTFe2T4';
+
+function initSupabase(url, key){
+  const u = url || document.getElementById('sb-url-input')?.value.trim() || SB_URL;
+  const k = key || document.getElementById('sb-key-input')?.value.trim() || SB_KEY;
+  if(!u || !k){
+    document.getElementById('sb-banner').style.display='block';
+    return;
+  }
+  try{
+    sbClient = window.supabase.createClient(u, k);
+    sbConnected = true;
+    document.getElementById('sb-banner').style.display='none';
+    document.getElementById('sb-setup').style.display='none';
+    const st=document.getElementById('sb-connect-status');
+    if(st)st.textContent='Connected!';
+    loadFromSupabase();
+    subscribeRealtime();
+    console.log('Supabase connected');
+  }catch(e){
+    const st=document.getElementById('sb-connect-status');
+    if(st)st.textContent='Error: '+e.message;
+    console.error('Supabase error',e);
+  }
+}
+
+async function loadFromSupabase(){
+  if(!sbClient)return;
+  try{
+    const {data,error}=await sbClient.from('attendance').select('*').order('created_at',{ascending:true});
+    if(error)throw error;
+    // Clear local history and reload from DB
+    Object.keys(HISTORY).forEach(k=>delete HISTORY[k]);
+    (data||[]).forEach(row=>{
+      const day=getDay(row.date_key);
+      if(day[row.salah]){
+        // avoid duplicates
+        if(!day[row.salah].find(p=>p.name===row.name&&p.location===row.location)){
+          day[row.salah].push({
+            name:row.name,
+            role:row.role||'Khadim',
+            streak:1,
+            quran:row.quran||'',
+            location:row.location||'mosque',
+            db_id:row.id
+          });
+        }
+      }
+    });
+    renderAllGrids();
+    renderStats();
+    renderLeaderboard();
+    if(todaySelected)renderAttList(todaySelected,'today-att-list');
+    console.log('Loaded',data?.length,'records from Supabase');
+  }catch(e){
+    console.error('Load error',e);
+  }
+}
+
+function subscribeRealtime(){
+  if(!sbClient)return;
+  if(realtimeChannel)realtimeChannel.unsubscribe();
+  realtimeChannel=sbClient
+    .channel('attendance-changes')
+    .on('postgres_changes',{event:'INSERT',schema:'public',table:'attendance'},payload=>{
+      const row=payload.new;
+      const day=getDay(row.date_key);
+      if(day[row.salah]&&!day[row.salah].find(p=>p.db_id===row.id)){
+        day[row.salah].push({
+          name:row.name,role:row.role||'Khadim',streak:1,
+          quran:row.quran||'',location:row.location||'mosque',db_id:row.id
+        });
+        renderAllGrids();renderStats();renderLeaderboard();
+        if(todaySelected)renderAttList(todaySelected,'today-att-list');
+        // Flash the relevant salah card
+        flashCard(row.salah);
+      }
+    })
+    .subscribe();
+}
+
+function flashCard(salahName){
+  const cards=document.querySelectorAll('.salah-card');
+  cards.forEach(c=>{
+    if(c.textContent.includes(salahName)){
+      c.style.transition='background 0.1s';
+      c.style.background='rgba(201,168,76,0.2)';
+      setTimeout(()=>{c.style.background='';},800);
+    }
+  });
+}
+
+async function sbInsert(entry){
+  if(!sbClient)return;
+  try{
+    const {data,error}=await sbClient.from('attendance').insert([entry]).select();
+    if(error)throw error;
+    if(data&&data[0])return data[0].id;
+  }catch(e){
+    console.error('Insert error',e);
+  }
+  return null;
+}
+
+// Wrapped push functions that also write to Supabase
+async function attPushWithSync(salah,entry,dateKey){
+  const dk=dateKey||todayKey();
+  const day=getDay(dk);
+  day[salah].push(entry);
+  if(sbConnected){
+    const id=await sbInsert({
+      date_key:dk,
+      salah:salah,
+      name:entry.name,
+      role:entry.role||'Khadim',
+      quran:entry.quran||'',
+      location:entry.location||'mosque',
+    });
+    if(id)entry.db_id=id;
+  }
+}
+
+// Try to auto-connect if keys are hardcoded
+if(SB_URL && SB_KEY){
+  // Will run after page loads
+} else {
+  // Show setup banner to user
+  setTimeout(()=>{
+    if(!sbConnected)document.getElementById('sb-banner').style.display='block';
+  },1500);
+}
+
 // ── BOOT ──────────────────────────────────────────────────────────────────────
 initDate();
 renderClock();
@@ -1353,6 +1511,11 @@ renderAttList(cur.name,'today-att-list');
 document.getElementById('today-salah-label').textContent=cur.name;
 setDetected();
 setInterval(renderClock,30000);
+
+// Auto-connect Supabase if keys are present
+if(SB_URL && SB_KEY){
+  initSupabase(SB_URL, SB_KEY);
+}
 
 // Auto-focus name field when check-in tab is opened
 const origSv=window.sv;
