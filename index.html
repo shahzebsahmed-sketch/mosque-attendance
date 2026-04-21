@@ -230,20 +230,15 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
 .notice-date{font-size:11px;color:var(--txt3);margin-top:6px}
 
 
-/* KHULAFA PANEL */
-.khulafa-panel{background:var(--s1);border-top:0.5px solid var(--bdr);border-bottom:0.5px solid var(--bdr);padding:1rem 1.25rem;position:relative;z-index:1}
-.khulafa-scroll{display:flex;gap:10px;overflow-x:auto;padding-bottom:6px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
-.khulafa-scroll::-webkit-scrollbar{display:none}
-.khalifa-card{flex-shrink:0;width:110px;text-align:center;cursor:pointer;transition:transform 0.2s}
-.khalifa-card:hover{transform:translateY(-3px)}
-.khalifa-img-wrap{width:72px;height:72px;border-radius:50%;margin:0 auto 8px;overflow:hidden;border:2px solid var(--gold3);background:var(--s2);position:relative}
-.khalifa-img-wrap img{width:100%;height:100%;object-fit:cover;object-position:center top;display:block}
-.khalifa-img-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;font-family:'Amiri',serif;font-size:22px;color:var(--gold3)}
-.khalifa-num{font-size:9px;color:var(--gold3);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px}
-.khalifa-name{font-family:'Amiri',serif;font-size:12px;color:var(--gold);line-height:1.3;margin-bottom:2px}
-.khalifa-years{font-size:10px;color:var(--txt3)}
-.khalifa-card.active .khalifa-img-wrap{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,168,76,0.2)}
-.khulafa-label{font-size:10px;color:var(--txt3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:8px}
+/* ASMA UL HUSNA PANEL */
+.asma-panel{background:var(--s1);border-top:0.5px solid var(--bdr);border-bottom:0.5px solid var(--bdr);padding:1rem 1.25rem;position:relative;z-index:1;text-align:center}
+.asma-label{font-size:9px;color:var(--gold3);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.asma-arabic{font-family:'Amiri',serif;font-size:28px;color:var(--gold);direction:rtl;line-height:1.3;margin-bottom:4px;transition:opacity 0.6s}
+.asma-transliteration{font-size:13px;color:var(--txt2);font-family:'Outfit',sans-serif;margin-bottom:2px;transition:opacity 0.6s}
+.asma-meaning{font-size:11px;color:var(--txt3);font-style:italic;transition:opacity 0.6s}
+.asma-dots{display:flex;justify-content:center;gap:5px;margin-top:8px}
+.asma-dot{width:4px;height:4px;border-radius:50%;background:var(--bdr2);transition:background 0.3s;cursor:pointer}
+.asma-dot.on{background:var(--gold)}
 
 /* LIVE STATS TABLE */
 .stats-table{width:100%;border-collapse:collapse;margin-bottom:1.25rem}
@@ -361,62 +356,13 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
 </div>
 
 
-<!-- KHULAFA-E-AHMADIYYAT PANEL -->
-<div class="khulafa-panel">
-  <div class="khulafa-label">Khulafa-e-Ahmadiyyat</div>
-  <div class="khulafa-scroll">
-
-    <div class="khalifa-card" onclick="selectKhalifa(0,this)">
-      <div class="khalifa-img-wrap">
-        <img src="images/khalifa1.jpg" alt="Hazrat Mirza Ghulam Ahmad" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="khalifa-img-placeholder" style="display:none">&#9670;</div>
-      </div>
-      <div class="khalifa-num">Promised Messiah (as)</div>
-      <div class="khalifa-name">Hazrat Mirza Ghulam Ahmad</div>
-      <div class="khalifa-years">1835 – 1908</div>
-    </div>
-
-    <div class="khalifa-card" onclick="selectKhalifa(1,this)">
-      <div class="khalifa-img-wrap">
-        <img src="images/khalifa2.jpg" alt="Khalifatul Masih II" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="khalifa-img-placeholder" style="display:none">&#9670;</div>
-      </div>
-      <div class="khalifa-num">Khalifatul Masih II (ra)</div>
-      <div class="khalifa-name">Hazrat Mirza Bashiruddin Mahmud Ahmad</div>
-      <div class="khalifa-years">1889 – 1965</div>
-    </div>
-
-    <div class="khalifa-card" onclick="selectKhalifa(2,this)">
-      <div class="khalifa-img-wrap">
-        <img src="images/khalifa3.jpg" alt="Khalifatul Masih III" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="khalifa-img-placeholder" style="display:none">&#9670;</div>
-      </div>
-      <div class="khalifa-num">Khalifatul Masih III (rh)</div>
-      <div class="khalifa-name">Hazrat Mirza Nasir Ahmad</div>
-      <div class="khalifa-years">1909 – 1982</div>
-    </div>
-
-    <div class="khalifa-card" onclick="selectKhalifa(3,this)">
-      <div class="khalifa-img-wrap">
-        <img src="images/khalifa4.jpg" alt="Khalifatul Masih IV" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="khalifa-img-placeholder" style="display:none">&#9670;</div>
-      </div>
-      <div class="khalifa-num">Khalifatul Masih IV (rh)</div>
-      <div class="khalifa-name">Hazrat Mirza Tahir Ahmad</div>
-      <div class="khalifa-years">1928 – 2003</div>
-    </div>
-
-    <div class="khalifa-card active" onclick="selectKhalifa(4,this)">
-      <div class="khalifa-img-wrap">
-        <img src="images/khalifa5.jpg" alt="Khalifatul Masih V" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-        <div class="khalifa-img-placeholder" style="display:none">&#9670;</div>
-      </div>
-      <div class="khalifa-num">Khalifatul Masih V (aba)</div>
-      <div class="khalifa-name">Hazrat Mirza Masroor Ahmad</div>
-      <div class="khalifa-years">1950 – present</div>
-    </div>
-
-  </div>
+<!-- AL-ASMA UL-HUSNA PANEL -->
+<div class="asma-panel">
+  <div class="asma-label">Al-Asma ul-Husna — The 99 Beautiful Names of Allah</div>
+  <div class="asma-arabic" id="asma-arabic">ٱللَّٰه</div>
+  <div class="asma-transliteration" id="asma-trans">Allah</div>
+  <div class="asma-meaning" id="asma-meaning">The One and Only God — worthy of all worship</div>
+  <div class="asma-dots" id="asma-dots"></div>
 </div>
 
 <nav>
@@ -1096,158 +1042,146 @@ function renderLiveNamesTable(){
     </tr>`).join('');
 }
 
-// ── KHALIFA PANEL ─────────────────────────────────────────────────────────────
-const KHULAFA_QUOTES=[
-  '"Be dutiful to Salat in such a way that all the intentions of your soul entirely become Salat." — Malfuzat Vol.1',
-  '"Salat is a treasure trove of supplications — it is the mi\u02BCraj of the believer." — Malfuzat Vol.2',
-  '"Salat is the good deed which dispels satanic weakness." — Malfuzat Vol.2',
-  '"There is no incantation better than Salat. It dispels all sorts of sorrows and resolves difficulties." — Malfuzat Vol.3',
-  '"No matter what happens, do not miss your prayers." — Hazrat Mirza Masroor Ahmad (aba), Jan 2024',
+// ── AL-ASMA UL-HUSNA ─────────────────────────────────────────────────────────
+const ASMA = [
+  {ar:'ٱللَّٰه',        tr:'Allah',          en:'The One God'},
+  {ar:'ٱلرَّحْمَٰن',    tr:'Ar-Rahman',      en:'The Most Gracious'},
+  {ar:'ٱلرَّحِيم',      tr:'Ar-Raheem',      en:'The Most Merciful'},
+  {ar:'ٱلْمَلِك',       tr:'Al-Malik',       en:'The Sovereign Lord'},
+  {ar:'ٱلْقُدُّوس',     tr:'Al-Quddus',      en:'The Most Holy'},
+  {ar:'ٱلسَّلَام',      tr:'As-Salam',       en:'The Source of Peace'},
+  {ar:'ٱلْمُؤْمِن',     tr:'Al-Mumin',       en:'The Guardian of Faith'},
+  {ar:'ٱلْمُهَيْمِن',   tr:'Al-Muhaymin',    en:'The Protector'},
+  {ar:'ٱلْعَزِيز',      tr:'Al-Aziz',        en:'The Almighty'},
+  {ar:'ٱلْجَبَّار',     tr:'Al-Jabbar',      en:'The Compeller'},
+  {ar:'ٱلْمُتَكَبِّر',  tr:'Al-Mutakabbir',  en:'The Majestic'},
+  {ar:'ٱلْخَالِق',      tr:'Al-Khaliq',      en:'The Creator'},
+  {ar:'ٱلْبَارِئ',      tr:'Al-Bari',        en:'The Originator'},
+  {ar:'ٱلْمُصَوِّر',    tr:'Al-Musawwir',    en:'The Fashioner'},
+  {ar:'ٱلْغَفَّار',     tr:'Al-Ghaffar',     en:'The Repeatedly Forgiving'},
+  {ar:'ٱلْقَهَّار',     tr:'Al-Qahhar',      en:'The All-Subduer'},
+  {ar:'ٱلْوَهَّاب',     tr:'Al-Wahhab',      en:'The Bestower'},
+  {ar:'ٱلرَّزَّاق',     tr:'Ar-Razzaq',      en:'The Provider'},
+  {ar:'ٱلْفَتَّاح',     tr:'Al-Fattah',      en:'The Opener'},
+  {ar:'ٱلْعَلِيم',      tr:'Al-Aleem',       en:'The All-Knowing'},
+  {ar:'ٱلْقَابِض',      tr:'Al-Qabid',       en:'The Withholder'},
+  {ar:'ٱلْبَاسِط',      tr:'Al-Basit',       en:'The Extender'},
+  {ar:'ٱلْخَافِض',      tr:'Al-Khafid',      en:'The Reducer'},
+  {ar:'ٱلرَّافِع',      tr:'Ar-Rafi',        en:'The Exalter'},
+  {ar:'ٱلْمُعِز',       tr:'Al-Muizz',       en:'The Honourer'},
+  {ar:'ٱلْمُذِل',       tr:'Al-Mudhill',     en:'The Humiliator'},
+  {ar:'ٱلسَّمِيع',      tr:'As-Sami',        en:'The All-Hearing'},
+  {ar:'ٱلْبَصِير',      tr:'Al-Basir',       en:'The All-Seeing'},
+  {ar:'ٱلْحَكَم',       tr:'Al-Hakam',       en:'The Judge'},
+  {ar:'ٱلْعَدْل',       tr:'Al-Adl',         en:'The Just'},
+  {ar:'ٱللَّطِيف',      tr:'Al-Latif',       en:'The Subtle One'},
+  {ar:'ٱلْخَبِير',      tr:'Al-Khabir',      en:'The All-Aware'},
+  {ar:'ٱلْحَلِيم',      tr:'Al-Halim',       en:'The Forbearing'},
+  {ar:'ٱلْعَظِيم',      tr:'Al-Azim',        en:'The Magnificent'},
+  {ar:'ٱلْغَفُور',      tr:'Al-Ghafur',      en:'The Forgiving'},
+  {ar:'ٱلشَّكُور',      tr:'Ash-Shakur',     en:'The Appreciative'},
+  {ar:'ٱلْعَلِيّ',      tr:'Al-Ali',         en:'The Most High'},
+  {ar:'ٱلْكَبِير',      tr:'Al-Kabir',       en:'The Most Great'},
+  {ar:'ٱلْحَفِيظ',      tr:'Al-Hafiz',       en:'The Preserver'},
+  {ar:'ٱلْمُقِيت',      tr:'Al-Muqit',       en:'The Sustainer'},
+  {ar:'ٱلْحَسِيب',      tr:'Al-Hasib',       en:'The Reckoner'},
+  {ar:'ٱلْجَلِيل',      tr:'Al-Jalil',       en:'The Majestic'},
+  {ar:'ٱلْكَرِيم',      tr:'Al-Karim',       en:'The Most Generous'},
+  {ar:'ٱلرَّقِيب',      tr:'Ar-Raqib',       en:'The Watchful'},
+  {ar:'ٱلْمُجِيب',      tr:'Al-Mujib',       en:'The Responsive'},
+  {ar:'ٱلْوَاسِع',      tr:'Al-Wasi',        en:'The All-Encompassing'},
+  {ar:'ٱلْحَكِيم',      tr:'Al-Hakim',       en:'The Perfectly Wise'},
+  {ar:'ٱلْوَدُود',      tr:'Al-Wadud',       en:'The Loving'},
+  {ar:'ٱلْمَجِيد',      tr:'Al-Majid',       en:'The Most Glorious'},
+  {ar:'ٱلْبَاعِث',      tr:'Al-Baith',       en:'The Resurrector'},
+  {ar:'ٱلشَّهِيد',      tr:'Ash-Shahid',     en:'The Witness'},
+  {ar:'ٱلْحَق',         tr:'Al-Haqq',        en:'The Truth'},
+  {ar:'ٱلْوَكِيل',      tr:'Al-Wakil',       en:'The Trustee'},
+  {ar:'ٱلْقَوِي',       tr:'Al-Qawi',        en:'The Most Strong'},
+  {ar:'ٱلْمَتِين',      tr:'Al-Matin',       en:'The Firm'},
+  {ar:'ٱلْوَلِيّ',      tr:'Al-Wali',        en:'The Protecting Friend'},
+  {ar:'ٱلْحَمِيد',      tr:'Al-Hamid',       en:'The Praiseworthy'},
+  {ar:'ٱلْمُحْصِي',     tr:'Al-Muhsi',       en:'The Counter'},
+  {ar:'ٱلْمُبْدِئ',     tr:'Al-Mubdi',       en:'The Originator'},
+  {ar:'ٱلْمُعِيد',      tr:'Al-Muid',        en:'The Restorer'},
+  {ar:'ٱلْمُحْيِي',     tr:'Al-Muhyi',       en:'The Giver of Life'},
+  {ar:'ٱلْمُمِيت',      tr:'Al-Mumit',       en:'The Taker of Life'},
+  {ar:'ٱلْحَيّ',        tr:'Al-Hayy',        en:'The Ever-Living'},
+  {ar:'ٱلْقَيُّوم',     tr:'Al-Qayyum',      en:'The Self-Subsisting'},
+  {ar:'ٱلْوَاجِد',      tr:'Al-Wajid',       en:'The Finder'},
+  {ar:'ٱلْمَاجِد',      tr:'Al-Majid',       en:'The Illustrious'},
+  {ar:'ٱلْوَاحِد',      tr:'Al-Wahid',       en:'The One'},
+  {ar:'ٱلْأَحَد',       tr:'Al-Ahad',        en:'The Unique'},
+  {ar:'ٱلصَّمَد',       tr:'As-Samad',       en:'The Eternal'},
+  {ar:'ٱلْقَادِر',      tr:'Al-Qadir',       en:'The Capable'},
+  {ar:'ٱلْمُقْتَدِر',   tr:'Al-Muqtadir',    en:'The Powerful'},
+  {ar:'ٱلْمُقَدِّم',    tr:'Al-Muqaddim',    en:'The Expediter'},
+  {ar:'ٱلْمُؤَخِّر',    tr:'Al-Muakhkhir',   en:'The Delayer'},
+  {ar:'ٱلْأَوَّل',      tr:'Al-Awwal',       en:'The First'},
+  {ar:'ٱلْآخِر',        tr:'Al-Akhir',       en:'The Last'},
+  {ar:'ٱلظَّاهِر',      tr:'Az-Zahir',       en:'The Manifest'},
+  {ar:'ٱلْبَاطِن',      tr:'Al-Batin',       en:'The Hidden'},
+  {ar:'ٱلْوَالِي',      tr:'Al-Wali',        en:'The Governor'},
+  {ar:'ٱلْمُتَعَالِي',  tr:'Al-Mutaali',     en:'The Most Exalted'},
+  {ar:'ٱلْبَر',         tr:'Al-Barr',        en:'The Source of Goodness'},
+  {ar:'ٱلتَّوَّاب',     tr:'At-Tawwab',      en:'The Ever-Pardoning'},
+  {ar:'ٱلْمُنْتَقِم',   tr:'Al-Muntaqim',    en:'The Avenger'},
+  {ar:'ٱلْعَفُو',       tr:'Al-Afuw',        en:'The Pardoner'},
+  {ar:'ٱلرَّءُوف',      tr:'Ar-Rauf',        en:'The Most Kind'},
+  {ar:'مَالِك ٱلْمُلْك',tr:'Malik-ul-Mulk',  en:'Owner of All Sovereignty'},
+  {ar:'ذُو ٱلْجَلَال',  tr:'Dhul-Jalal',     en:'Lord of Majesty and Honour'},
+  {ar:'ٱلْمُقْسِط',     tr:'Al-Muqsit',      en:'The Equitable'},
+  {ar:'ٱلْجَامِع',      tr:'Al-Jami',        en:'The Gatherer'},
+  {ar:'ٱلْغَنِيّ',      tr:'Al-Ghani',       en:'The Self-Sufficient'},
+  {ar:'ٱلْمُغْنِي',     tr:'Al-Mughni',      en:'The Enricher'},
+  {ar:'ٱلْمَانِع',      tr:'Al-Mani',        en:'The Preventer'},
+  {ar:'ٱلضَّار',        tr:'Ad-Darr',        en:'The Distresser'},
+  {ar:'ٱلنَّافِع',      tr:'An-Nafi',        en:'The Propitious'},
+  {ar:'ٱلنُّور',        tr:'An-Nur',         en:'The Light'},
+  {ar:'ٱلْهَادِي',      tr:'Al-Hadi',        en:'The Guide'},
+  {ar:'ٱلْبَدِيع',      tr:'Al-Badi',        en:'The Incomparable Originator'},
+  {ar:'ٱلْبَاقِي',      tr:'Al-Baqi',        en:'The Ever-Enduring'},
+  {ar:'ٱلْوَارِث',      tr:'Al-Warith',      en:'The Inheritor'},
+  {ar:'ٱلرَّشِيد',      tr:'Ar-Rashid',      en:'The Guide to Right Path'},
+  {ar:'ٱلصَّبُور',      tr:'As-Sabur',       en:'The Patient'},
 ];
-function selectKhalifa(idx,el){
-  document.querySelectorAll('.khalifa-card').forEach(c=>c.classList.remove('active'));
-  el.classList.add('active');
-  // Show their quote in the inline quote section on Today tab
-  const iq=document.getElementById('iq-text');
-  const ia=document.getElementById('iq-attr');
-  if(iq)iq.textContent=KHULAFA_QUOTES[idx];
-  const names=['Hazrat Mirza Ghulam Ahmad (as)','Hazrat Mirza Bashiruddin Mahmud Ahmad (ra)','Hazrat Mirza Nasir Ahmad (rh)','Hazrat Mirza Tahir Ahmad (rh)','Hazrat Mirza Masroor Ahmad (aba)'];
-  if(ia)ia.textContent='— '+names[idx];
-}
-function renderWeeklyChart(){
-  // Last 7 days
-  const dates=[];
-  for(let i=6;i>=0;i--){
-    const d=new Date();d.setDate(d.getDate()-i);
-    const key=d.toISOString().split('T')[0];
-    const label=d.toLocaleDateString('en-GB',{weekday:'short'});
-    const dayData=HISTORY[key]||{};
-    const total=SALAHS.reduce((s,sal)=>s+(dayData[sal.name]||[]).length,0);
-    dates.push({key,label,total,isToday:i===0});
+
+let asmaIdx = 0;
+let asmaTimer = null;
+
+function showAsma(idx){
+  const a = ASMA[idx];
+  const ar = document.getElementById('asma-arabic');
+  const tr = document.getElementById('asma-trans');
+  const mn = document.getElementById('asma-meaning');
+  if(!ar)return;
+  // Fade out
+  ar.style.opacity='0';tr.style.opacity='0';mn.style.opacity='0';
+  setTimeout(()=>{
+    ar.textContent = a.ar;
+    tr.textContent = a.tr;
+    mn.textContent = a.en;
+    ar.style.opacity='1';tr.style.opacity='1';mn.style.opacity='1';
+  },400);
+  // Update dots (show 7 around current)
+  const dots = document.getElementById('asma-dots');
+  if(dots){
+    dots.innerHTML = ASMA.map((_,i)=>`<span class="asma-dot ${i===idx?'on':''}" onclick="jumpAsma(${i})"></span>`).join('');
   }
-  const mx=Math.max(1,...dates.map(d=>d.total));
-  document.getElementById('weekly-bars').innerHTML=dates.map(d=>`
-    <div class="bar-wrap">
-      <div class="bar-val">${d.total}</div>
-      <div class="bar" style="height:${Math.round(d.total/mx*76)+4}px;background:${d.isToday?'var(--gold)':'var(--gold3)'}"></div>
-      <div class="bar-lbl">${d.label}</div>
-    </div>`).join('');
-}
-function renderLeaderboard(){
-  const all={};
-  Object.values(HISTORY).forEach(dayData=>{
-    SALAHS.forEach(s=>{
-      (dayData[s.name]||[]).forEach(p=>{
-        const key=p.name.toLowerCase();
-        if(!all[key])all[key]={name:p.name,sessions:0,mosque:0,home:0,quran:''};
-        all[key].sessions++;
-        if(p.location==='home')all[key].home++;else all[key].mosque++;
-        if(p.quran)all[key].quran=p.quran;
-      });
-    });
-  });
-  const top=Object.values(all).sort((a,b)=>b.sessions-a.sessions).slice(0,8);
-  document.getElementById('leaderboard').innerHTML=top.length?top.map((p,i)=>`
-    <div class="rank-row">
-      <div class="rank-num ${i<3?'top':''}">${i===0?'★':i+1}</div>
-      <div class="av" style="width:30px;height:30px;font-size:10px">${initials(p.name)}</div>
-      <div class="rank-info">
-        <div class="rank-name">${p.name}</div>
-        <div class="rank-meta">${p.sessions} prayers total · ${p.mosque} mosque · ${p.home} home${p.quran?' · Quran: '+p.quran:''}</div>
-      </div>
-      <div class="rank-streak" style="font-size:11px;text-align:right">${p.sessions}<br><span style="font-size:9px;color:var(--txt3)">total</span></div>
-    </div>`).join(''):'<div class="empty-state">No data yet — be the first to check in!</div>';
 }
 
-// ── NOTICE BOARD ──────────────────────────────────────────────────────────────
-// ── NOTICE BOARD (admin-gated) ───────────────────────────────────────────────
-let NOTICES = [];
-const ADMIN_PASS = 'admin123';
-let adminLoggedIn = false;
+function jumpAsma(idx){
+  asmaIdx=idx;
+  showAsma(idx);
+  clearInterval(asmaTimer);
+  asmaTimer=setInterval(()=>{asmaIdx=(asmaIdx+1)%ASMA.length;showAsma(asmaIdx);},5000);
+}
 
-function renderNotices(){
-  const el=document.getElementById('notices-list');
-  if(!el)return;
-  if(!NOTICES.length){
-    el.innerHTML=`<div class="empty-state" style="padding:3rem 1rem">
-      <div style="font-size:28px;margin-bottom:12px;opacity:0.3">&#128226;</div>
-      <div style="font-size:14px;color:var(--txt2);margin-bottom:4px">No announcements yet</div>
-      <div style="font-size:12px;color:var(--txt3)">Check back soon</div>
-    </div>`;
-    return;
-  }
-  const tagLabel={event:'Event',reminder:'Reminder',info:'Info'};
-  el.innerHTML=NOTICES.map(n=>`
-    <div class="notice-card">
-      <span class="notice-tag tag-${n.tag}">${tagLabel[n.tag]||n.tag}</span>
-      <div class="notice-title">${n.title}</div>
-      <div class="notice-body">${n.body}</div>
-      <div class="notice-date">${n.date}</div>
-    </div>`).join('');
-}
-function renderAdminNotices(){
-  const el=document.getElementById('admin-notices-list');
-  if(!el)return;
-  if(!NOTICES.length){el.innerHTML='<div class="empty-state">No notices posted yet</div>';return;}
-  const tagLabel={event:'Event',reminder:'Reminder',info:'Info'};
-  el.innerHTML=NOTICES.map((n,i)=>`
-    <div class="notice-card" style="position:relative">
-      <span class="notice-tag tag-${n.tag}">${tagLabel[n.tag]||n.tag}</span>
-      <button onclick="deleteNotice(${i})" style="position:absolute;top:10px;right:10px;background:rgba(226,75,74,0.1);border:0.5px solid rgba(226,75,74,0.3);color:var(--red);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif">Delete</button>
-      <div class="notice-title">${n.title}</div>
-      <div class="notice-body">${n.body}</div>
-      <div class="notice-date">${n.date}</div>
-    </div>`).join('');
-}
-function showAdminGate(){
-  document.getElementById('public-notices').style.display='none';
-  if(adminLoggedIn){showAdminPanel();return;}
-  document.getElementById('admin-gate').style.display='block';
-  setTimeout(()=>{const pw=document.getElementById('admin-pw');if(pw)pw.focus();},100);
-}
-function hideAdminGate(){
-  document.getElementById('admin-gate').style.display='none';
-  document.getElementById('public-notices').style.display='block';
-}
-function checkAdmin(){
-  const pw=document.getElementById('admin-pw').value;
-  if(pw===ADMIN_PASS){
-    adminLoggedIn=true;
-    document.getElementById('admin-gate').style.display='none';
-    showAdminPanel();
-  } else {
-    document.getElementById('admin-pw-err').style.display='block';
-    document.getElementById('admin-pw').value='';
-  }
-}
-function showAdminPanel(){
-  document.getElementById('admin-panel').style.display='block';
-  renderAdminNotices();
-}
-function logoutAdmin(){
-  adminLoggedIn=false;
-  document.getElementById('admin-panel').style.display='none';
-  document.getElementById('public-notices').style.display='block';
-}
-function addNotice(){
-  const tag=document.getElementById('adm-tag').value;
-  const title=document.getElementById('adm-title').value.trim();
-  const body=document.getElementById('adm-body').value.trim();
-  const errEl=document.getElementById('adm-err');
-  if(!title||!body){errEl.style.display='block';return;}
-  errEl.style.display='none';
-  const now=new Date();
-  const date='Posted '+now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
-  NOTICES.unshift({tag,title,body,date});
-  document.getElementById('adm-title').value='';
-  document.getElementById('adm-body').value='';
-  renderNotices();
-  renderAdminNotices();
-}
-function deleteNotice(idx){
-  NOTICES.splice(idx,1);
-  renderNotices();
-  renderAdminNotices();
+function initAsma(){
+  // Start from a random name each time
+  asmaIdx=Math.floor(Math.random()*ASMA.length);
+  showAsma(asmaIdx);
+  asmaTimer=setInterval(()=>{asmaIdx=(asmaIdx+1)%ASMA.length;showAsma(asmaIdx);},5000);
 }
 
 // ── PAST DATES ────────────────────────────────────────────────────────────────
@@ -1420,30 +1354,52 @@ async function loadFromSupabase(){
     if(todaySelected)renderAttList(todaySelected,'today-att-list');
     console.log('Loaded',data?.length,'records from Supabase');
   }catch(e){
-    console.error('Load error',e);
+    const msg = e?.message || e?.error_description || JSON.stringify(e);
+    console.error('Load error — details:', msg, e);
+    // Most likely cause: table doesn't exist or RLS blocking
+    // Check Supabase dashboard: Table Editor → attendance table exists?
   }
 }
 
 function subscribeRealtime(){
   if(!sbClient)return;
-  if(realtimeChannel)realtimeChannel.unsubscribe();
-  realtimeChannel=sbClient
-    .channel('attendance-changes')
-    .on('postgres_changes',{event:'INSERT',schema:'public',table:'attendance'},payload=>{
-      const row=payload.new;
-      const day=getDay(row.date_key);
-      if(day[row.salah]&&!day[row.salah].find(p=>p.db_id===row.id)){
-        day[row.salah].push({
-          name:row.name,role:row.role||'Khadim',streak:1,
-          quran:row.quran||'',location:row.location||'mosque',db_id:row.id
-        });
-        renderAllGrids();renderStats();renderLeaderboard();
-        if(todaySelected)renderAttList(todaySelected,'today-att-list');
-        // Flash the relevant salah card
-        flashCard(row.salah);
-      }
-    })
-    .subscribe();
+  // Try realtime first, fall back to polling if it fails
+  try{
+    if(realtimeChannel)realtimeChannel.unsubscribe();
+    realtimeChannel=sbClient
+      .channel('attendance-changes')
+      .on('postgres_changes',{event:'INSERT',schema:'public',table:'attendance'},payload=>{
+        const row=payload.new;
+        const day=getDay(row.date_key);
+        if(day[row.salah]&&!day[row.salah].find(p=>p.db_id===row.id)){
+          day[row.salah].push({
+            name:row.name,role:row.role||'Khadim',streak:1,
+            quran:row.quran||'',location:row.location||'mosque',db_id:row.id
+          });
+          renderAllGrids();renderStats();renderLeaderboard();
+          if(todaySelected)renderAttList(todaySelected,'today-att-list');
+          flashCard(row.salah);
+        }
+      })
+      .subscribe((status,err)=>{
+        if(err||status==='CHANNEL_ERROR'){
+          console.warn('Realtime unavailable, switching to polling');
+          startPolling();
+        }
+      });
+  }catch(e){
+    console.warn('Realtime failed, switching to polling:', e.message);
+    startPolling();
+  }
+}
+
+let pollInterval=null;
+function startPolling(){
+  if(pollInterval)return; // already polling
+  pollInterval=setInterval(()=>{
+    loadFromSupabase();
+  }, 5000); // refresh every 5 seconds
+  console.log('Polling every 5s');
 }
 
 function flashCard(salahName){
@@ -1464,7 +1420,7 @@ async function sbInsert(entry){
     if(error)throw error;
     if(data&&data[0])return data[0].id;
   }catch(e){
-    console.error('Insert error',e);
+    console.error('Insert error — details:', e?.message || JSON.stringify(e), e);
   }
   return null;
 }
@@ -1501,6 +1457,7 @@ if(SB_URL && SB_KEY){
 initDate();
 renderClock();
 initQuotes();
+initAsma();
 renderInlineQuote();
 const cur=getCurrentSalah();
 todaySelected=cur.name;
