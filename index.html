@@ -927,16 +927,47 @@ function renderAttList(salahName,containerId,dayData){
   const el=document.getElementById(containerId);if(!el)return;
   const d=dayData||getTodayATT();
   const ppl=d[salahName]||[];
+  const isToday=!dayData; // only show remove on today's list
   if(!ppl.length){el.innerHTML=`<div class="empty-state">No attendees yet for ${salahName}</div>`;return;}
-  el.innerHTML=ppl.map(p=>`
+  el.innerHTML=ppl.map((p,idx)=>`
     <div class="att-row">
       <div class="av">${initials(p.name)}</div>
       <div class="att-info">
         <div class="att-name">${p.name} <span class="loc-badge ${p.location==='home'?'loc-home':'loc-mosque'}">${p.location==='home'?'Home':'Mosque'}</span></div>
-        <div class="att-meta">${p.role}</div>
+        <div class="att-meta">${p.role}${p.quran?' · '+p.quran:''}</div>
       </div>
-      ${p.quran?`<div class="att-quran">${p.quran}</div>`:''}
+      ${isToday?`<button onclick="removeEntry('${salahName}',${idx})" style="background:none;border:0.5px solid rgba(226,75,74,0.35);color:var(--red);border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif;flex-shrink:0" title="Remove entry">✕</button>`:''}
     </div>`).join('');
+}
+
+async function removeEntry(salahName, idx){
+  const d=getTodayATT();
+  const ppl=d[salahName]||[];
+  if(idx<0||idx>=ppl.length)return;
+  const p=ppl[idx];
+  if(!confirm('Remove '+p.name+' from '+salahName+'?'))return;
+  // Remove locally
+  ppl.splice(idx,1);
+  // Remove from Supabase
+  if(sbConnected&&sbClient){
+    try{
+      if(p.db_id){
+        await sbClient.from('attendance').delete().eq('id',p.db_id);
+      } else {
+        await sbClient.from('attendance').delete()
+          .eq('date_key',todayKey())
+          .eq('salah',salahName)
+          .eq('name',p.name)
+          .eq('location',p.location||'mosque');
+      }
+      console.log('Removed',p.name,'from',salahName);
+    }catch(e){console.error('Remove error',e.message);}
+  }
+  renderAllGrids();
+  renderStats();
+  renderLeaderboard();
+  renderLiveNamesTable();
+  if(todaySelected)renderAttList(todaySelected,'today-att-list');
 }
 
 // ── TODAY SELECT ──────────────────────────────────────────────────────────────
