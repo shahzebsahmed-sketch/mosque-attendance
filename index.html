@@ -22,6 +22,13 @@ body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);min-h
   background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(201,168,76,0.6) 39px,rgba(201,168,76,0.6) 40px),
   repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(201,168,76,0.6) 39px,rgba(201,168,76,0.6) 40px)}
 
+
+/* KHULAFA ROTATING BACKGROUND */
+.khulafa-bg{position:fixed;inset:0;z-index:0;pointer-events:none}
+.khulafa-bg-slide{position:absolute;inset:0;background-size:cover;background-position:center top;opacity:0;transition:opacity 2.5s ease-in-out;filter:brightness(0.12) saturate(0.4)}
+.khulafa-bg-slide.visible{opacity:1}
+.khulafa-overlay{position:absolute;inset:0;background:rgba(10,15,26,0.82)}
+
 /* HERO */
 .mosque-hero{position:relative;width:100%;height:280px;overflow:hidden;z-index:1}
 .hero-img{width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block;filter:brightness(0.45) saturate(0.8)}
@@ -249,6 +256,15 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
 <body>
 <div class="geo"></div>
 
+<div class="khulafa-bg" id="khulafa-bg">
+  <div class="khulafa-overlay"></div>
+  <div class="khulafa-bg-slide" id="kb0" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/a/a1/Mirza_Ghulam_Ahmad.jpg')"></div>
+  <div class="khulafa-bg-slide" id="kb1" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/3/38/Mirza_Bashiruddin_Mahmud_Ahmad.jpg')"></div>
+  <div class="khulafa-bg-slide" id="kb2" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/f/f5/Mirza_Nasir_Ahmad.jpg')"></div>
+  <div class="khulafa-bg-slide" id="kb3" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/6/6e/Mirza_Tahir_Ahmad.jpg')"></div>
+  <div class="khulafa-bg-slide" id="kb4" style="background-image:url('https://upload.wikimedia.org/wikipedia/commons/1/10/Mirza_Masroor_Ahmad_2019.jpg')"></div>
+</div>
+
 <!-- HERO WITH MOSQUE IMAGE -->
 <div class="mosque-hero">
   <img src="https://www.alislam.org/wp-content/uploads/2019/11/Prayer-Salat-Mubarak-Mosque-Islamabad.jpg"
@@ -281,7 +297,7 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
 <nav>
   <button class="nb on"  onclick="sv('today',this)">Today</button>
   <button class="nb"     onclick="sv('qr',this)">QR Code</button>
-  <button class="nb"     onclick="sv('checkin',this)">Check In</button>
+  <button class="nb"     onclick="sv('checkin',this)">Check In Mosque</button>
   <button class="nb"     onclick="sv('home',this)">Prayed at Home</button>
   <button class="nb"     onclick="sv('stats',this)">Stats</button>
   <button class="nb"     onclick="sv('board',this)">Notice Board</button>
@@ -730,9 +746,7 @@ let ciSalah = null;
 let ciName = '';
 let qqRead = null;
 
-function setDetected(){
-  ciSalah=null;
-}
+function setDetected(){}
 
 function showPrayerChange(){
   const el=document.getElementById('prayer-change');
@@ -1022,13 +1036,40 @@ renderAttList(cur.name,'today-att-list');
 document.getElementById('today-salah-label').textContent=cur.name;
 setDetected();
 setInterval(renderClock,30000);
+
+// ── KHULAFA BACKGROUND ROTATOR ────────────────────────────────────────────────
+(function(){
+  const slides=document.querySelectorAll('.khulafa-bg-slide');
+  let idx=0;
+  function showSlide(i){
+    slides.forEach((s,j)=>s.classList.toggle('visible',j===i));
+  }
+  const caption=document.createElement('div');
+  caption.style.cssText='position:fixed;bottom:14px;left:0;right:0;text-align:center;font-size:10px;color:rgba(201,168,76,0.45);letter-spacing:1px;z-index:0;pointer-events:none;padding:0 1rem;font-family:Outfit,sans-serif';
+  caption.id='khalifa-caption';
+  document.body.appendChild(caption);
+  const names=['Hazrat Mirza Ghulam Ahmad (as) — The Promised Messiah &amp; Imam Mahdi', 'Hazrat Mirza Bashiruddin Mahmud Ahmad (ra) — Khalifatul Masih II', 'Hazrat Mirza Nasir Ahmad (rh) — Khalifatul Masih III', 'Hazrat Mirza Tahir Ahmad (rh) — Khalifatul Masih IV', 'Hazrat Mirza Masroor Ahmad (aba) — Khalifatul Masih V'];
+  function showSlide(i){
+    slides.forEach((s,j)=>s.classList.toggle('visible',j===i));
+    if(caption)caption.innerHTML=names[i]||'';
+  }
+  showSlide(0);
+  setInterval(()=>{idx=(idx+1)%slides.length;showSlide(idx);},7000);
+})();
 // Auto-focus name field when check-in tab is opened
 const origSv=window.sv;
 window.sv=function(id,el){
   origSv(id,el);
   if(id==='checkin'){
-    setDetected();
-    setTimeout(()=>{const inp=document.getElementById('ci-name');if(inp)inp.focus();},100);
+    setTimeout(()=>{
+      // Auto-select current prayer if none selected yet
+      if(!ciSalah){
+        const cur=getCurrentSalah();
+        const btns=document.querySelectorAll('#ci-prayer-grid .prayer-sel-btn');
+        btns.forEach(b=>{if(b.textContent.trim()===cur.name){b.click();}});
+      }
+      const inp=document.getElementById('ci-name');if(inp)inp.focus();
+    },100);
   }
   if(id==='board'){
     renderNotices();
@@ -1037,7 +1078,14 @@ window.sv=function(id,el){
     if(!adminLoggedIn)document.getElementById('admin-panel').style.display='none';
   }
   if(id==='home'){
-    setTimeout(()=>{const inp=document.getElementById('hp-name');if(inp)inp.focus();},100);
+    setTimeout(()=>{
+      if(!hpSalah){
+        const cur=getCurrentSalah();
+        const btns=document.querySelectorAll('.hp-btn');
+        btns.forEach(b=>{if(b.textContent.trim()===cur.name){b.click();}});
+      }
+      const inp=document.getElementById('hp-name');if(inp)inp.focus();
+    },100);
   }
 };
 </script>
