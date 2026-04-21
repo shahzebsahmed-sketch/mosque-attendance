@@ -992,8 +992,10 @@ function confirmName(){
   // Save attendance immediately — name is enough
   if(!attFind(ciSalah,name)){
     const moEntry={name,role:'Khadim',streak:1,quran:'',location:'mosque'};
-    attPushWithSync(ciSalah,moEntry);
-    lastEntry={salah:ciSalah,name,dateKey:todayKey(),entry:moEntry};
+    lastEntry={salah:ciSalah,name,dateKey:todayKey(),location:'mosque',entry:moEntry};
+    attPushWithSync(ciSalah,moEntry).then(()=>{
+      // db_id now set on moEntry if Supabase succeeded
+    });
   }
   renderAllGrids();renderStats();renderLeaderboard();
   // Move to step 2 (quran optional)
@@ -1520,8 +1522,10 @@ function submitHP(){
   document.getElementById('hp-name-err').style.display='none';
   if(!attFind(hpSalah,name)){
     const hpEntry={name,role:'Khadim',streak:1,quran:'',location:'home'};
-    attPushWithSync(hpSalah,hpEntry);
-    lastEntry={salah:hpSalah,name,dateKey:todayKey(),entry:hpEntry};
+    lastEntry={salah:hpSalah,name,dateKey:todayKey(),location:'home',entry:hpEntry};
+    attPushWithSync(hpSalah,hpEntry).then(()=>{
+      // db_id now set on hpEntry if Supabase succeeded
+    });
   } else {
     const entry=attFind(hpSalah,name);
     if(entry)entry.location='home';
@@ -1554,24 +1558,37 @@ function resetHP(){
 
 // ── UNDO LAST ENTRY ──────────────────────────────────────────────────────────
 async function undoLastEntry(source){
-  if(!lastEntry){alert('Nothing to remove.');return;}
-  const {salah,name,dateKey,entry}=lastEntry;
+  if(!lastEntry){
+    if(source==='mosque')resetCI();
+    else resetHP();
+    return;
+  }
+  const {salah,name,dateKey,location,entry}=lastEntry;
   // Remove from local HISTORY
   const day=getDay(dateKey);
   if(day[salah]){
-    const idx=day[salah].findIndex(p=>p.name===name&&p.location===entry.location);
+    const idx=day[salah].findIndex(p=>p.name===name&&p.location===location);
     if(idx>=0)day[salah].splice(idx,1);
   }
-  // Remove from Supabase if connected
-  if(sbConnected&&sbClient&&entry.db_id){
+  // Remove from Supabase — try by db_id first, fall back to name+salah+date
+  if(sbConnected&&sbClient){
     try{
-      await sbClient.from('attendance').delete().eq('id',entry.db_id);
+      if(entry&&entry.db_id){
+        await sbClient.from('attendance').delete().eq('id',entry.db_id);
+      } else {
+        // Fallback: delete by name + salah + date_key + location
+        await sbClient.from('attendance').delete()
+          .eq('date_key',dateKey)
+          .eq('salah',salah)
+          .eq('name',name)
+          .eq('location',location);
+      }
       console.log('Removed from Supabase');
-    }catch(e){console.error('Delete error',e);}
+    }catch(e){console.error('Delete error',e.message);}
   }
   lastEntry=null;
   renderAllGrids();renderStats();renderLeaderboard();renderLiveNamesTable();
-  // Go back to step 1
+  // Flash confirmation
   if(source==='mosque'){resetCI();}
   else{resetHP();}
 }
@@ -1737,7 +1754,7 @@ async function sbInsert(entry){
 }
 
 // Wrapped push functions that also write to Supabase
-async function attPushWithSync(salah,entry,dateKey){
+async function attPushWithSync(salah,entry,dateKey){ // returns Promise
   const dk=dateKey||todayKey();
   const day=getDay(dk);
   day[salah].push(entry);
