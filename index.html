@@ -484,9 +484,12 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
       <div class="suc-wrap">
         <div class="suc-circle">&#10003;</div>
         <div class="suc-h">Jazakallah Khair!</div>
-        <div class="suc-p" id="ci-suc-name"></div>
-        <div class="suc-chips" id="ci-suc-chips"></div>
+        <div class="suc-p" id="ci-suc-name" style="font-size:15px;color:var(--txt);font-weight:500;margin-bottom:6px"></div>
+        <div class="suc-chips" id="ci-suc-chips" style="margin-bottom:1rem"></div>
+        <div id="ci-suc-quote" style="font-size:12px;color:var(--txt2);font-style:italic;max-width:320px;margin:0 auto 1.25rem;line-height:1.7;background:var(--s2);border-left:2px solid var(--gold3);border-radius:0 8px 8px 0;padding:10px 14px;text-align:left"></div>
         <button class="btn-again" onclick="resetCI()">Check in again</button>
+        <br>
+        <button onclick="undoLastEntry('mosque')" style="margin-top:8px;font-size:11px;color:var(--red);background:none;border:0.5px solid rgba(226,75,74,0.3);border-radius:6px;padding:5px 14px;cursor:pointer;font-family:'Outfit',sans-serif">Remove this entry</button>
       </div>
     </div>
 
@@ -520,13 +523,16 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
     </div>
     <div id="hp-step2" style="display:none">
       <div class="suc-wrap">
-        <div class="suc-circle">&#10003;</div>
+        <div class="suc-circle" style="border-color:var(--green2)">&#10003;</div>
         <div class="suc-h" style="color:var(--green2)">Alhamdulillah!</div>
-        <div class="suc-p" id="hp-suc-text"></div>
-        <div class="suc-chips">
+        <div class="suc-p" id="hp-suc-text" style="font-size:15px;color:var(--txt);font-weight:500;margin-bottom:6px"></div>
+        <div class="suc-chips" style="margin-bottom:1rem">
           <span class="chip" style="background:rgba(45,158,107,0.1);color:var(--green2);border:0.5px solid rgba(45,158,107,0.3)" id="hp-chip"></span>
         </div>
+        <div id="hp-suc-quote" style="font-size:12px;color:var(--txt2);font-style:italic;max-width:320px;margin:0 auto 1.25rem;line-height:1.7;background:var(--s2);border-left:2px solid var(--gold3);border-radius:0 8px 8px 0;padding:10px 14px;text-align:left"></div>
         <button class="btn-again" onclick="resetHP()">Mark another</button>
+        <br>
+        <button onclick="undoLastEntry('home')" style="margin-top:8px;font-size:11px;color:var(--red);background:none;border:0.5px solid rgba(226,75,74,0.3);border-radius:6px;padding:5px 14px;cursor:pointer;font-family:'Outfit',sans-serif">Remove this entry</button>
       </div>
     </div>
   </div>
@@ -953,6 +959,7 @@ function initQR(){
 let ciSalah = null;
 let ciName = '';
 let qqRead = null;
+let lastEntry = null; // {salah, name, dateKey, dbId} for undo
 
 function setDetected(){}
 
@@ -982,7 +989,9 @@ function confirmName(){
   ciName=name;
   // Save attendance immediately — name is enough
   if(!attFind(ciSalah,name)){
-    attPushWithSync(ciSalah,{name,role:'Khadim',streak:1,quran:'',location:'mosque'});
+    const moEntry={name,role:'Khadim',streak:1,quran:'',location:'mosque'};
+    attPushWithSync(ciSalah,moEntry);
+    lastEntry={salah:ciSalah,name,dateKey:todayKey(),entry:moEntry};
   }
   renderAllGrids();renderStats();renderLeaderboard();
   // Move to step 2 (quran optional)
@@ -1016,11 +1025,23 @@ function submitFull(skipQuran){
   // Show confirmation
   document.getElementById('ci-step2').style.display='none';
   document.getElementById('ci-step3').style.display='block';
-  document.getElementById('ci-suc-name').textContent=ciName+' — '+ciSalah+' recorded';
+  document.getElementById('ci-suc-name').textContent=ciName;
   const chips=document.getElementById('ci-suc-chips');
-  chips.innerHTML=`<span class="chip chip-prayer">${ciSalah}</span>`;
+  chips.innerHTML=`<span class="chip chip-prayer">${ciSalah}</span><span class="chip loc-mosque" style="margin-left:4px">Mosque</span>`;
   const entry=attFind(ciSalah,ciName);
-  if(entry&&entry.quran)chips.innerHTML+=`<span class="chip chip-quran">Quran: ${entry.quran}</span>`;
+  if(entry&&entry.quran)chips.innerHTML+=`<span class="chip chip-quran" style="margin-top:6px">&#9654; Quran: ${entry.quran}</span>`;
+  // Show a random quote
+  const quotes=[
+    '"Salat is a treasure trove of supplications — it is the miʼraj of the believer." — Malfuzat Vol.2',
+    '"No matter what happens, do not miss your prayers." — Hazrat Mirza Masroor Ahmad (aba)',
+    '"Offer Prayers with commitment to regularity. There is no exemption from Prayers." — Malfuzat Vol.1',
+    '"He who wants to meet Allah, Salat is the vehicle by which he can get there quicker." — Malfuzat Vol.3',
+    '"Perpetuate love for God in your hearts; nothing is more effective for that than Salat." — Malfuzat Vol.2',
+    '"Salat definitely and surely dispels evils." — Hazrat Mirza Ghulam Ahmad (as), Malfuzat Vol.1',
+  ];
+  const q=quotes[Math.floor(Math.random()*quotes.length)];
+  const qel=document.getElementById('ci-suc-quote');
+  if(qel)qel.textContent=q;
 }
 
 function resetCI(){
@@ -1361,15 +1382,27 @@ function submitHP(){
   if(!name){document.getElementById('hp-name-err').style.display='block';return;}
   document.getElementById('hp-name-err').style.display='none';
   if(!attFind(hpSalah,name)){
-    attPushWithSync(hpSalah,{name,role:'Khadim',streak:1,quran:'',location:'home'});
+    const hpEntry={name,role:'Khadim',streak:1,quran:'',location:'home'};
+    attPushWithSync(hpSalah,hpEntry);
+    lastEntry={salah:hpSalah,name,dateKey:todayKey(),entry:hpEntry};
   } else {
     const entry=attFind(hpSalah,name);
     if(entry)entry.location='home';
   }
-  document.getElementById('hp-suc-text').textContent=name+' — '+hpSalah;
-  document.getElementById('hp-chip').textContent='Prayed at home';
+  document.getElementById('hp-suc-text').textContent=name;
+  document.getElementById('hp-chip').textContent=hpSalah+' — Prayed at home';
   document.getElementById('hp-step1').style.display='none';
   document.getElementById('hp-step2').style.display='block';
+  const hpQuotes=[
+    '"Salat, in fact, is a supplication to the Lord of Glory, without which one cannot survive." — Malfuzat Vol.2',
+    '"The greatest criterion of man's pious life is Salat. He who keeps crying out to God lives in peace." — Malfuzat Vol.1',
+    '"Salat is the good deed which dispels satanic weakness." — Malfuzat Vol.2',
+    '"Salat is the key to acceptance of supplication. Supplicate during it and do not be unmindful." — Malfuzat Vol.3',
+    '"Allah has ninety-nine names, and He is Al-Mujeeb — The Responsive. Call upon Him in Salat." — Hadith',
+  ];
+  const hpQ=hpQuotes[Math.floor(Math.random()*hpQuotes.length)];
+  const hpQel=document.getElementById('hp-suc-quote');
+  if(hpQel)hpQel.textContent=hpQ;
   renderAllGrids();renderStats();renderLeaderboard();
 }
 function resetHP(){
@@ -1380,6 +1413,30 @@ function resetHP(){
   hpSalah=null;
   document.getElementById('hp-step1').style.display='block';
   document.getElementById('hp-step2').style.display='none';
+}
+
+// ── UNDO LAST ENTRY ──────────────────────────────────────────────────────────
+async function undoLastEntry(source){
+  if(!lastEntry){alert('Nothing to remove.');return;}
+  const {salah,name,dateKey,entry}=lastEntry;
+  // Remove from local HISTORY
+  const day=getDay(dateKey);
+  if(day[salah]){
+    const idx=day[salah].findIndex(p=>p.name===name&&p.location===entry.location);
+    if(idx>=0)day[salah].splice(idx,1);
+  }
+  // Remove from Supabase if connected
+  if(sbConnected&&sbClient&&entry.db_id){
+    try{
+      await sbClient.from('attendance').delete().eq('id',entry.db_id);
+      console.log('Removed from Supabase');
+    }catch(e){console.error('Delete error',e);}
+  }
+  lastEntry=null;
+  renderAllGrids();renderStats();renderLeaderboard();renderLiveNamesTable();
+  // Go back to step 1
+  if(source==='mosque'){resetCI();}
+  else{resetHP();}
 }
 
 // ── RENDER ALL ────────────────────────────────────────────────────────────────
