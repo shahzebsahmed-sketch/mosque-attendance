@@ -582,8 +582,8 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
     <table class="stats-table" id="live-names-table">
       <thead><tr>
         <th>Name</th>
-        <th>Prayers attended</th>
-        <th style="text-align:right">Quran</th>
+        <th>Prayer</th>
+        <th style="text-align:right">Type / Quran</th>
       </tr></thead>
       <tbody id="live-names-body">
         <tr><td colspan="3" style="text-align:center;color:var(--txt3);padding:1.5rem;font-size:13px">No check-ins yet today</td></tr>
@@ -594,6 +594,21 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
   <p class="sec">Weekly attendance (last 7 days)</p>
   <div class="chart-wrap" style="margin-bottom:1.25rem">
     <div class="chart-bars" id="weekly-bars"></div>
+  </div>
+
+  <p class="sec">All attendance history</p>
+  <div style="background:var(--s1);border:0.5px solid var(--bdr);border-radius:13px;overflow:hidden;margin-bottom:1.25rem">
+    <table class="stats-table" id="history-names-table">
+      <thead><tr>
+        <th>Name</th>
+        <th>Date</th>
+        <th>Prayer</th>
+        <th style="text-align:right">Type / Quran</th>
+      </tr></thead>
+      <tbody id="history-names-body">
+        <tr><td colspan="4" style="text-align:center;color:var(--txt3);padding:1rem;font-size:13px">No past records</td></tr>
+      </tbody>
+    </table>
   </div>
 
   <p class="sec">All-time leaderboard</p>
@@ -1006,40 +1021,70 @@ function renderStats(){
 function renderLiveNamesTable(){
   const tbody=document.getElementById('live-names-body');
   if(!tbody)return;
-  // Aggregate ALL history dates
-  const map={};
-  Object.entries(HISTORY).sort((a,b)=>b[0].localeCompare(a[0])).forEach(([dateKey,dayData])=>{
-    const d=new Date(dateKey);
+  const salahOrder={Fajr:0,Zuhr:1,Asr:2,Maghrib:3,Isha:4};
+
+  // ── TODAY section ──────────────────────────────────────────────────────────
+  const todayData=getTodayATT();
+  const todayRows=[];
+  SALAHS.forEach(s=>{
+    (todayData[s.name]||[]).forEach(p=>{
+      todayRows.push({name:p.name,salah:s.name,quran:p.quran||'',location:p.location||'mosque'});
+    });
+  });
+  todayRows.sort((a,b)=>salahOrder[a.salah]-salahOrder[b.salah]);
+
+  // ── ALL HISTORY section ────────────────────────────────────────────────────
+  const histRows=[];
+  Object.entries(HISTORY).sort((a,b)=>b[0].localeCompare(a[0])).forEach(([dk,dayData])=>{
+    if(dk===todayKey())return; // today already shown above
+    const d=new Date(dk+'T12:00:00'); // noon to avoid timezone shift
     const label=d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'});
     SALAHS.forEach(s=>{
       (dayData[s.name]||[]).forEach(p=>{
-        const key=p.name.toLowerCase()+'|'+dateKey+'|'+s.name;
-        if(!map[key])map[key]={name:p.name,salah:s.name,date:label,quran:p.quran||'',location:p.location||'mosque'};
-        if(p.quran)map[key].quran=p.quran;
+        histRows.push({name:p.name,salah:s.name,date:label,dateKey:dk,quran:p.quran||'',location:p.location||'mosque'});
       });
     });
   });
-  const rows=Object.values(map);
-  // Sort: newest date first, then by salah order
-  const salahOrder={Fajr:0,Zuhr:1,Asr:2,Maghrib:3,Isha:4};
-  rows.sort((a,b)=>b.date.localeCompare(a.date)||salahOrder[a.salah]-salahOrder[b.salah]);
-  if(!rows.length){
-    tbody.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--txt3);padding:1.5rem;font-size:13px">No check-ins yet</td></tr>';
-    return;
-  }
-  // Update table header
+  histRows.sort((a,b)=>b.dateKey.localeCompare(a.dateKey)||salahOrder[a.salah]-salahOrder[b.salah]);
+
+  // Update table header for today view
   const thead=document.querySelector('#live-names-table thead tr');
-  if(thead)thead.innerHTML='<th>Name</th><th>Date</th><th>Prayer</th><th style="text-align:right">Type / Quran</th>';
-  tbody.innerHTML=rows.map(r=>`
-    <tr>
-      <td class="st-name">${r.name}</td>
-      <td style="font-size:12px;color:var(--txt2)">${r.date}</td>
-      <td><span class="st-pill">${r.salah}</span></td>
-      <td style="text-align:right">
-        <span class="loc-badge ${r.location==='home'?'loc-home':'loc-mosque'}">${r.location==='home'?'Home':'Mosque'}</span>
-        ${r.quran?`<span class="st-quran-icon" style="margin-left:4px" title="${r.quran}">&#9654; ${r.quran}</span>`:''}
-      </td>
-    </tr>`).join('');
+  if(thead)thead.innerHTML='<th>Name</th><th>Prayer</th><th style="text-align:right">Type / Quran</th>';
+
+  if(!todayRows.length){
+    tbody.innerHTML='<tr><td colspan="3" style="text-align:center;color:var(--txt3);padding:1.5rem;font-size:13px">No check-ins yet today</td></tr>';
+  } else {
+    tbody.innerHTML=todayRows.map(r=>`
+      <tr>
+        <td class="st-name">${r.name}</td>
+        <td><span class="st-pill">${r.salah}</span></td>
+        <td style="text-align:right">
+          <span class="loc-badge ${r.location==='home'?'loc-home':'loc-mosque'}">${r.location==='home'?'Home':'Mosque'}</span>
+          ${r.quran?`<span class="st-quran-icon" style="margin-left:4px">&#9654; ${r.quran}</span>`:''}
+        </td>
+      </tr>`).join('');
+  }
+
+  // Render history section below
+  const histEl=document.getElementById('history-names-body');
+  if(!histEl)return;
+  if(!histRows.length){
+    histEl.innerHTML='<tr><td colspan="4" style="text-align:center;color:var(--txt3);padding:1rem;font-size:13px">No past records</td></tr>';
+  } else {
+    // Update history header
+    const histHead=document.querySelector('#history-names-table thead tr');
+    if(histHead)histHead.innerHTML='<th>Name</th><th>Date</th><th>Prayer</th><th style="text-align:right">Type / Quran</th>';
+    histEl.innerHTML=histRows.map(r=>`
+      <tr>
+        <td class="st-name">${r.name}</td>
+        <td style="font-size:12px;color:var(--txt2)">${r.date}</td>
+        <td><span class="st-pill">${r.salah}</span></td>
+        <td style="text-align:right">
+          <span class="loc-badge ${r.location==='home'?'loc-home':'loc-mosque'}">${r.location==='home'?'Home':'Mosque'}</span>
+          ${r.quran?`<span class="st-quran-icon" style="margin-left:4px">&#9654; ${r.quran}</span>`:''}
+        </td>
+      </tr>`).join('');
+  }
 }
 
 // ── AL-ASMA UL-HUSNA ─────────────────────────────────────────────────────────
@@ -1351,6 +1396,7 @@ async function loadFromSupabase(){
     renderAllGrids();
     renderStats();
     renderLeaderboard();
+    renderLiveNamesTable();
     if(todaySelected)renderAttList(todaySelected,'today-att-list');
     console.log('Loaded',data?.length,'records from Supabase');
   }catch(e){
