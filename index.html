@@ -221,6 +221,25 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
 .notice-body{font-size:12px;color:var(--txt2);line-height:1.65}
 .notice-date{font-size:11px;color:var(--txt3);margin-top:6px}
 
+/* PRAYER SELECT BUTTONS */
+.prayer-sel-btn{padding:10px 4px;border-radius:10px;border:1.5px solid var(--bdr);background:transparent;color:var(--txt2);font-family:'Outfit',sans-serif;font-size:13px;cursor:pointer;transition:all 0.2s;text-align:center;width:100%}
+.prayer-sel-btn.on{background:rgba(201,168,76,0.15);border-color:var(--gold);color:var(--gold);font-weight:500}
+.prayer-sel-btn:hover:not(.on){border-color:var(--bdr2);color:var(--txt)}
+/* HOME PRAYER */
+.home-card{background:var(--s1);border:0.5px solid var(--bdr2);border-radius:16px;padding:1.5rem;margin-bottom:1rem}
+.home-prayer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:1.25rem}
+.hp-btn{padding:14px 8px;border-radius:12px;border:1.5px solid var(--bdr);background:transparent;color:var(--txt2);font-family:'Outfit',sans-serif;font-size:14px;cursor:pointer;transition:all 0.2s;text-align:center;font-family:'Amiri',serif}
+.hp-btn.on{background:rgba(45,158,107,0.12);border-color:rgba(45,158,107,0.4);color:var(--green2);font-weight:500}
+.hp-btn:hover:not(.on){border-color:var(--bdr2);color:var(--txt)}
+/* ADMIN NOTICE BOARD */
+.admin-gate{text-align:center;padding:2rem 1rem}
+.admin-gate-title{font-family:'Amiri',serif;font-size:20px;color:var(--gold);margin-bottom:8px}
+.admin-gate-sub{font-size:13px;color:var(--txt2);margin-bottom:1.25rem}
+.admin-input{width:100%;max-width:300px;background:var(--s2);border:0.5px solid var(--bdr);color:var(--txt);border-radius:8px;padding:10px 14px;font-family:'Outfit',sans-serif;font-size:14px;outline:none;text-align:center}
+.admin-input:focus{border-color:var(--gold3)}
+.admin-form{background:var(--s1);border:0.5px solid var(--bdr2);border-radius:14px;padding:1.25rem;margin-bottom:1rem}
+.admin-logout{font-size:11px;color:var(--txt3);cursor:pointer;border:none;background:none;font-family:'Outfit',sans-serif;float:right;margin-bottom:8px}
+.admin-logout:hover{color:var(--red)}
 /* SCROLLBAR */
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -263,6 +282,7 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
   <button class="nb on"  onclick="sv('today',this)">Today</button>
   <button class="nb"     onclick="sv('qr',this)">QR Code</button>
   <button class="nb"     onclick="sv('checkin',this)">Check In</button>
+  <button class="nb"     onclick="sv('home',this)">Prayed at Home</button>
   <button class="nb"     onclick="sv('stats',this)">Stats</button>
   <button class="nb"     onclick="sv('board',this)">Notice Board</button>
 </nav>
@@ -273,9 +293,9 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
   <div class="prayer-clock">
     <div style="font-size:11px;color:var(--txt2);margin-bottom:4px"><span class="live-dot"></span> Now active</div>
     <div class="now-salah" id="cur-salah-name">—</div>
-    <div class="now-window" id="cur-window">—</div>
+
     <div class="salah-pills" id="salah-pills-today"></div>
-    <div class="countdown">Next: <span id="next-name">—</span> in <span id="next-in">—</span></div>
+
   </div>
 
   <div class="inline-quote" id="inline-quote">
@@ -310,11 +330,6 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
     </div>
   </div>
 
-  <p class="sec">Prayer time windows</p>
-  <div style="background:var(--s1);border:0.5px solid var(--bdr);border-radius:13px;overflow:hidden;margin-bottom:1.25rem">
-    <table class="time-tbl" id="time-tbl"></table>
-  </div>
-
   <p class="sec">Attendance by prayer today</p>
   <div class="salah-grid" id="qr-salah-grid"></div>
 </div>
@@ -329,28 +344,17 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
         <div style="font-family:'Amiri',serif;font-size:22px;color:var(--gold);margin-bottom:6px">Assalamu Alaikum</div>
         <div style="font-size:13px;color:var(--txt2)">Type your name to mark attendance</div>
       </div>
-      <div class="prayer-pill" style="display:flex;margin:0 auto 1.5rem;width:fit-content">
-        <span class="prayer-pill-dot"></span>
-        <span id="ci-salah-name">—</span>
-        &nbsp;·&nbsp;
-        <span id="ci-salah-time" style="color:var(--txt2)">—</span>
-      </div>
-      <div class="name-big">
-        <input type="text" id="ci-name" placeholder="Your name" autocomplete="name" autocorrect="off" autocapitalize="words" spellcheck="false" onkeydown="if(event.key==='Enter')confirmName()">
-      </div>
-      <div id="ci-name-err" style="font-size:12px;color:var(--red);text-align:center;margin-top:6px;display:none">Please enter your name</div>
-      <button class="btn-confirm" onclick="confirmName()">Mark Attended &#10003;</button>
-      <div style="text-align:center;margin-top:14px">
-        <button style="background:none;border:none;font-size:11px;color:var(--txt3);cursor:pointer;font-family:'Outfit',sans-serif" onclick="showPrayerChange()">Wrong prayer? Tap to change</button>
-      </div>
-      <div id="prayer-change" style="display:none;margin-top:10px">
-        <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">
-          <button class="qbtn" onclick="setCIPrayer('Fajr',this)">Fajr</button>
-          <button class="qbtn" onclick="setCIPrayer('Zuhr',this)">Zuhr</button>
-          <button class="qbtn" onclick="setCIPrayer('Asr',this)">Asr</button>
-          <button class="qbtn" onclick="setCIPrayer('Maghrib',this)">Maghrib</button>
-          <button class="qbtn" onclick="setCIPrayer('Isha',this)">Isha</button>
+      <div style="margin-bottom:1.25rem">
+        <div style="font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;text-align:center">Which prayer did you attend?</div>
+        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px" id="ci-prayer-grid">
+          <button class="prayer-sel-btn" onclick="setCIPrayer('Fajr',this)">Fajr</button>
+          <button class="prayer-sel-btn" onclick="setCIPrayer('Zuhr',this)">Zuhr</button>
+          <button class="prayer-sel-btn" onclick="setCIPrayer('Asr',this)">Asr</button>
+          <button class="prayer-sel-btn" onclick="setCIPrayer('Maghrib',this)">Maghrib</button>
+          <button class="prayer-sel-btn" onclick="setCIPrayer('Isha',this)">Isha</button>
         </div>
+        <div id="ci-prayer-err" style="font-size:12px;color:var(--red);text-align:center;margin-top:6px;display:none">Please select a prayer</div>
+      </div>
       </div>
     </div>
 
@@ -391,6 +395,45 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
   </div>
 </div>
 
+<!-- ===== HOME PRAYER ===== -->
+<div class="view" id="v-home">
+  <div style="padding:1rem 1.25rem 3rem;max-width:480px;margin:0 auto;position:relative;z-index:1">
+    <div id="hp-step1">
+      <div style="text-align:center;margin-bottom:1.5rem;margin-top:0.5rem">
+        <div style="font-family:'Amiri',serif;font-size:22px;color:var(--gold);margin-bottom:6px">Alhamdulillah</div>
+        <div style="font-size:13px;color:var(--txt2)">Mark your prayer offered at home</div>
+      </div>
+      <div style="margin-bottom:1.25rem">
+        <div style="font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;text-align:center">Which prayer?</div>
+        <div class="home-prayer-grid">
+          <button class="hp-btn" onclick="setHP('Fajr',this)">Fajr</button>
+          <button class="hp-btn" onclick="setHP('Zuhr',this)">Zuhr</button>
+          <button class="hp-btn" onclick="setHP('Asr',this)">Asr</button>
+          <button class="hp-btn" onclick="setHP('Maghrib',this)">Maghrib</button>
+          <button class="hp-btn" onclick="setHP('Isha',this)">Isha</button>
+        </div>
+        <div id="hp-prayer-err" style="font-size:12px;color:var(--red);text-align:center;margin-top:6px;display:none">Please select a prayer</div>
+      </div>
+      <div class="name-big" style="margin-bottom:12px">
+        <input type="text" id="hp-name" placeholder="Your name" autocomplete="name" autocorrect="off" autocapitalize="words" spellcheck="false" onkeydown="if(event.key==='Enter')submitHP()">
+      </div>
+      <div id="hp-name-err" style="font-size:12px;color:var(--red);text-align:center;margin-top:6px;display:none">Please enter your name</div>
+      <button class="btn-confirm" onclick="submitHP()">Mark Home Prayer &#10003;</button>
+    </div>
+    <div id="hp-step2" style="display:none">
+      <div class="suc-wrap">
+        <div class="suc-circle">&#10003;</div>
+        <div class="suc-h" style="color:var(--green2)">Alhamdulillah!</div>
+        <div class="suc-p" id="hp-suc-text"></div>
+        <div class="suc-chips">
+          <span class="chip" style="background:rgba(45,158,107,0.1);color:var(--green2);border:0.5px solid rgba(45,158,107,0.3)" id="hp-chip"></span>
+        </div>
+        <button class="btn-again" onclick="resetHP()">Mark another</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ===== STATS ===== -->
 <div class="view" id="v-stats">
   <p class="sec" style="margin-top:1rem">This week at a glance</p>
@@ -410,18 +453,79 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
 
 <!-- ===== NOTICE BOARD ===== -->
 <div class="view" id="v-board">
-  <p class="sec" style="margin-top:1rem">Announcements</p>
-  <div id="notices"></div>
+  <div style="padding:1rem 1.25rem 3rem;position:relative;z-index:1;max-width:720px;margin:0 auto">
+
+    <!-- Public notices list -->
+    <div id="public-notices">
+      <p class="sec" style="margin-top:0.5rem">Announcements</p>
+      <div id="notices-list">
+        <div class="empty-state" style="padding:3rem 1rem">
+          <div style="font-size:28px;margin-bottom:12px;opacity:0.3">&#128226;</div>
+          <div style="font-size:14px;color:var(--txt2);margin-bottom:4px">No announcements yet</div>
+          <div style="font-size:12px;color:var(--txt3)">Check back soon</div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:1.5rem">
+        <button style="font-size:11px;color:var(--txt3);background:none;border:none;cursor:pointer;font-family:'Outfit',sans-serif" onclick="showAdminGate()">Admin access</button>
+      </div>
+    </div>
+
+    <!-- Admin gate -->
+    <div id="admin-gate" style="display:none">
+      <div class="admin-gate">
+        <div class="admin-gate-title">Admin Login</div>
+        <div class="admin-gate-sub">Enter the admin password to manage notices</div>
+        <input class="admin-input" type="password" id="admin-pw" placeholder="Password" onkeydown="if(event.key==='Enter')checkAdmin()">
+        <br><br>
+        <button class="btn-confirm" style="max-width:200px;margin:0 auto;display:block;padding:11px" onclick="checkAdmin()">Login</button>
+        <div id="admin-pw-err" style="font-size:12px;color:var(--red);margin-top:8px;display:none">Incorrect password</div>
+        <br>
+        <button style="font-size:11px;color:var(--txt3);background:none;border:none;cursor:pointer;font-family:'Outfit',sans-serif" onclick="hideAdminGate()">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Admin panel -->
+    <div id="admin-panel" style="display:none">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;margin-top:0.5rem">
+        <p class="sec" style="margin-bottom:0;flex:1">Manage notices</p>
+        <button class="admin-logout" onclick="logoutAdmin()">Logout</button>
+      </div>
+      <div class="admin-form">
+        <div style="font-size:13px;font-weight:500;margin-bottom:12px;color:var(--txt)">Add new announcement</div>
+        <div class="field">
+          <label>Tag</label>
+          <select id="adm-tag" style="background:var(--s2);border:0.5px solid var(--bdr);color:var(--txt);border-radius:8px;padding:8px 12px;font-family:'Outfit',sans-serif;font-size:13px;outline:none;width:100%">
+            <option value="event">Event</option>
+            <option value="reminder">Reminder</option>
+            <option value="info">Info</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Title</label>
+          <input type="text" id="adm-title" placeholder="e.g. Monthly Ijtema — Saturday 26th" style="background:var(--s2);border:0.5px solid var(--bdr);color:var(--txt);border-radius:8px;padding:9px 12px;font-family:'Outfit',sans-serif;font-size:13px;outline:none;width:100%">
+        </div>
+        <div class="field">
+          <label>Body</label>
+          <textarea id="adm-body" placeholder="Full announcement text..." rows="3" style="background:var(--s2);border:0.5px solid var(--bdr);color:var(--txt);border-radius:8px;padding:9px 12px;font-family:'Outfit',sans-serif;font-size:13px;outline:none;width:100%;resize:vertical"></textarea>
+        </div>
+        <div id="adm-err" style="font-size:12px;color:var(--red);margin-bottom:8px;display:none">Please fill in title and body</div>
+        <button class="btn-primary" onclick="addNotice()">Post Announcement</button>
+      </div>
+      <p class="sec">Posted notices</p>
+      <div id="admin-notices-list"></div>
+    </div>
+
+  </div>
 </div>
 
 <script>
 // ── PRAYER TIMES ──────────────────────────────────────────────────────────────
 const SALAHS = [
-  {name:'Fajr',    start:[4,45],  end:[6,30],  label:'4:45 – 6:30 AM'},
-  {name:'Zuhr',    start:[13,0],  end:[14,45], label:'1:00 – 2:45 PM'},
-  {name:'Asr',     start:[15,45], end:[18,15], label:'3:45 – 6:15 PM'},
-  {name:'Maghrib', start:[19,30], end:[20,45], label:'7:30 – 8:45 PM'},
-  {name:'Isha',    start:[21,0],  end:[23,59], label:'9:00 PM – midnight'},
+  {name:'Fajr'},
+  {name:'Zuhr'},
+  {name:'Asr'},
+  {name:'Maghrib'},
+  {name:'Isha'},
 ];
 
 // ── QUOTES from alislam.org & Huzur (aba) ────────────────────────────────────
@@ -489,14 +593,10 @@ let quoteTimer = null;
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 function initials(n){return n.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}
 function curMins(){const n=new Date();return n.getHours()*60+n.getMinutes()}
-function getCurrentSalah(){
-  const m=curMins();
-  for(const s of SALAHS){if(m>=s.start[0]*60+s.start[1]&&m<s.end[0]*60+s.end[1])return s;}
-  return SALAHS[4];
-}
-function getNextSalah(){return SALAHS[(SALAHS.findIndex(s=>s.name===getCurrentSalah().name)+1)%SALAHS.length]}
-function minsUntilNext(){let d=getNextSalah().start[0]*60+getNextSalah().start[1]-curMins();if(d<0)d+=1440;return d}
-function fmtMins(m){const h=Math.floor(m/60),mm=m%60;return h>0?`${h}h ${mm}m`:`${mm}m`}
+function getCurrentSalah(){return SALAHS[0];}
+function getNextSalah(){return SALAHS[1];}
+function minsUntilNext(){return 0;}
+function fmtMins(m){return '';}
 function maxAtt(){return Math.max(1,...SALAHS.map(s=>ATT[s.name].length))}
 
 // ── DATE ──────────────────────────────────────────────────────────────────────
@@ -531,33 +631,14 @@ function renderInlineQuote(){
 
 // ── PRAYER CLOCK ──────────────────────────────────────────────────────────────
 function renderClock(){
-  const cur=getCurrentSalah(),next=getNextSalah(),diff=minsUntilNext();
-  document.getElementById('cur-salah-name').textContent=cur.name;
-  document.getElementById('cur-window').textContent=cur.label;
-  document.getElementById('next-name').textContent=next.name;
-  document.getElementById('next-in').textContent=fmtMins(diff);
-  const curIdx=SALAHS.findIndex(s=>s.name===cur.name);
-  document.getElementById('salah-pills-today').innerHTML=SALAHS.map((s,i)=>{
-    let c='salah-pill';
-    if(s.name===cur.name)c+=' cur';
-    else if(i<curIdx)c+=' done';
-    return `<span class="${c}">${s.name}</span>`;
+  document.getElementById('salah-pills-today').innerHTML=SALAHS.map(s=>{
+    return `<span class="salah-pill ${s.name===todaySelected?'cur':''}" onclick="selectTodaySalah('${s.name}')">${s.name}</span>`;
   }).join('');
-  const b=document.getElementById('qr-badge');if(b)b.textContent=cur.name;
+  const b=document.getElementById('qr-badge');if(b)b.textContent='Scan to check in';
 }
 
 // ── TIME TABLE ────────────────────────────────────────────────────────────────
-function renderTimeTable(){
-  const cur=getCurrentSalah();
-  document.getElementById('time-tbl').innerHTML=SALAHS.map(s=>{
-    const isCur=s.name===cur.name;
-    return `<tr class="${isCur?'tcur':''}">
-      <td class="tname" style="padding-left:16px">${s.name}</td>
-      <td class="twin">${s.label}</td>
-      <td style="text-align:right;padding-right:16px">${isCur?'<span style="color:var(--green2);font-size:12px">&#9679; Now</span>':'<span style="color:var(--txt3);font-size:12px">—</span>'}</td>
-    </tr>`;
-  }).join('');
-}
+function renderTimeTable(){}
 
 // ── SALAH GRID ────────────────────────────────────────────────────────────────
 function renderSalahGrid(containerId,onClickFn,activeSalah){
@@ -615,12 +696,7 @@ let ciName = '';
 let qqRead = null;
 
 function setDetected(){
-  const cur=getCurrentSalah();
-  ciSalah=cur.name;
-  const n=document.getElementById('ci-salah-name');
-  const t=document.getElementById('ci-salah-time');
-  if(n)n.textContent=cur.name;
-  if(t)t.textContent=cur.label;
+  ciSalah=null;
 }
 
 function showPrayerChange(){
@@ -633,7 +709,7 @@ function setCIPrayer(name,el){
   ciSalah=name;
   document.getElementById('ci-salah-name').textContent=name;
   const cur=SALAHS.find(s=>s.name===name);
-  if(cur)document.getElementById('ci-salah-time').textContent=cur.label;
+
   document.querySelectorAll('#prayer-change .qbtn').forEach(b=>b.classList.remove('on'));
   el.classList.add('on');
 }
@@ -641,12 +717,15 @@ function setCIPrayer(name,el){
 function confirmName(){
   const name=document.getElementById('ci-name').value.trim();
   const errEl=document.getElementById('ci-name-err');
+  const pErr=document.getElementById('ci-prayer-err');
+  if(!ciSalah){pErr.style.display='block';return;}
+  pErr.style.display='none';
   if(!name){errEl.style.display='block';return;}
   errEl.style.display='none';
   ciName=name;
   // Save attendance immediately — name is enough
   if(!ATT[ciSalah].find(p=>p.name.toLowerCase()===name.toLowerCase())){
-    ATT[ciSalah].push({name,role:'Khadim',streak:1,quran:''});
+    ATT[ciSalah].push({name,role:'Khadim',streak:1,quran:'',location:'mosque'});
   }
   renderAllGrids();renderStats();renderLeaderboard();
   // Move to step 2 (quran optional)
@@ -693,10 +772,9 @@ function resetCI(){
   document.getElementById('qq-num-pages').value='';
   document.getElementById('qq-num-ruku').value='';
   document.getElementById('qq-pages').style.display='none';
-  document.getElementById('prayer-change').style.display='none';
+  document.querySelectorAll('#ci-prayer-grid .prayer-sel-btn').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.qbtn').forEach(b=>b.classList.remove('on'));
-  qqRead=null;ciName='';
-  setDetected();
+  qqRead=null;ciName='';ciSalah=null;
   document.getElementById('ci-step1').style.display='block';
   document.getElementById('ci-step2').style.display='none';
   document.getElementById('ci-step3').style.display='none';
@@ -753,21 +831,129 @@ function renderLeaderboard(){
 }
 
 // ── NOTICE BOARD ──────────────────────────────────────────────────────────────
+// ── NOTICE BOARD (admin-gated) ───────────────────────────────────────────────
+let NOTICES = [];
+const ADMIN_PASS = 'admin123';
+let adminLoggedIn = false;
+
 function renderNotices(){
-  const notices=[
-    {tag:'event',   tagLabel:'Event',    title:'Monthly Ijtema — Saturday 26th April',   body:'All Khudam are requested to attend the monthly Ijtema after Fajr. Refreshments will be provided. Attendance is compulsory for all local Khudam.', date:'Posted 2 days ago'},
-    {tag:'reminder',tagLabel:'Reminder', title:'Daily Salah target: all 5 prayers',       body:'The Qaid has set a weekly target of attending all 5 daily prayers. Huzur (aba) reminds us: "No matter what happens, do not miss your prayers."',  date:'Posted 4 days ago'},
-    {tag:'info',    tagLabel:'Info',     title:'QR check-in system now live',              body:'Scan the QR code at the entrance to mark your attendance. If you forget, use the Check In tab and select the correct prayer manually.',            date:'Posted 1 week ago'},
-    {tag:'reminder',tagLabel:'Reminder', title:'Log your daily Quran tilawat',             body:'The check-in form includes a section to log your Quran reading. Please record your pages and Ruku each day so your tilawat progress is tracked.', date:'Posted 1 week ago'},
-    {tag:'event',   tagLabel:'Event',    title:'Waqar-e-Amal this Sunday after Fajr',     body:'All Khudam are invited to participate in this Sunday\'s voluntary community service. Meet at the mosque entrance after Fajr prayer.',             date:'Posted 10 days ago'},
-  ];
-  document.getElementById('notices').innerHTML=notices.map(n=>`
+  const el=document.getElementById('notices-list');
+  if(!el)return;
+  if(!NOTICES.length){
+    el.innerHTML=`<div class="empty-state" style="padding:3rem 1rem">
+      <div style="font-size:28px;margin-bottom:12px;opacity:0.3">&#128226;</div>
+      <div style="font-size:14px;color:var(--txt2);margin-bottom:4px">No announcements yet</div>
+      <div style="font-size:12px;color:var(--txt3)">Check back soon</div>
+    </div>`;
+    return;
+  }
+  const tagLabel={event:'Event',reminder:'Reminder',info:'Info'};
+  el.innerHTML=NOTICES.map(n=>`
     <div class="notice-card">
-      <span class="notice-tag tag-${n.tag}">${n.tagLabel}</span>
+      <span class="notice-tag tag-${n.tag}">${tagLabel[n.tag]||n.tag}</span>
       <div class="notice-title">${n.title}</div>
       <div class="notice-body">${n.body}</div>
       <div class="notice-date">${n.date}</div>
     </div>`).join('');
+}
+function renderAdminNotices(){
+  const el=document.getElementById('admin-notices-list');
+  if(!el)return;
+  if(!NOTICES.length){el.innerHTML='<div class="empty-state">No notices posted yet</div>';return;}
+  const tagLabel={event:'Event',reminder:'Reminder',info:'Info'};
+  el.innerHTML=NOTICES.map((n,i)=>`
+    <div class="notice-card" style="position:relative">
+      <span class="notice-tag tag-${n.tag}">${tagLabel[n.tag]||n.tag}</span>
+      <button onclick="deleteNotice(${i})" style="position:absolute;top:10px;right:10px;background:rgba(226,75,74,0.1);border:0.5px solid rgba(226,75,74,0.3);color:var(--red);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif">Delete</button>
+      <div class="notice-title">${n.title}</div>
+      <div class="notice-body">${n.body}</div>
+      <div class="notice-date">${n.date}</div>
+    </div>`).join('');
+}
+function showAdminGate(){
+  document.getElementById('public-notices').style.display='none';
+  if(adminLoggedIn){showAdminPanel();return;}
+  document.getElementById('admin-gate').style.display='block';
+  setTimeout(()=>{const pw=document.getElementById('admin-pw');if(pw)pw.focus();},100);
+}
+function hideAdminGate(){
+  document.getElementById('admin-gate').style.display='none';
+  document.getElementById('public-notices').style.display='block';
+}
+function checkAdmin(){
+  const pw=document.getElementById('admin-pw').value;
+  if(pw===ADMIN_PASS){
+    adminLoggedIn=true;
+    document.getElementById('admin-gate').style.display='none';
+    showAdminPanel();
+  } else {
+    document.getElementById('admin-pw-err').style.display='block';
+    document.getElementById('admin-pw').value='';
+  }
+}
+function showAdminPanel(){
+  document.getElementById('admin-panel').style.display='block';
+  renderAdminNotices();
+}
+function logoutAdmin(){
+  adminLoggedIn=false;
+  document.getElementById('admin-panel').style.display='none';
+  document.getElementById('public-notices').style.display='block';
+}
+function addNotice(){
+  const tag=document.getElementById('adm-tag').value;
+  const title=document.getElementById('adm-title').value.trim();
+  const body=document.getElementById('adm-body').value.trim();
+  const errEl=document.getElementById('adm-err');
+  if(!title||!body){errEl.style.display='block';return;}
+  errEl.style.display='none';
+  const now=new Date();
+  const date='Posted '+now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  NOTICES.unshift({tag,title,body,date});
+  document.getElementById('adm-title').value='';
+  document.getElementById('adm-body').value='';
+  renderNotices();
+  renderAdminNotices();
+}
+function deleteNotice(idx){
+  NOTICES.splice(idx,1);
+  renderNotices();
+  renderAdminNotices();
+}
+
+// ── HOME PRAYER ───────────────────────────────────────────────────────────────
+let hpSalah=null;
+function setHP(name,el){
+  hpSalah=name;
+  document.querySelectorAll('.hp-btn').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  document.getElementById('hp-prayer-err').style.display='none';
+}
+function submitHP(){
+  const name=document.getElementById('hp-name').value.trim();
+  if(!hpSalah){document.getElementById('hp-prayer-err').style.display='block';return;}
+  if(!name){document.getElementById('hp-name-err').style.display='block';return;}
+  document.getElementById('hp-name-err').style.display='none';
+  if(!ATT[hpSalah].find(p=>p.name.toLowerCase()===name.toLowerCase())){
+    ATT[hpSalah].push({name,role:'Khadim',streak:1,quran:'',location:'home'});
+  } else {
+    const entry=ATT[hpSalah].find(p=>p.name.toLowerCase()===name.toLowerCase());
+    entry.location='home';
+  }
+  document.getElementById('hp-suc-text').textContent=name+' — '+hpSalah;
+  document.getElementById('hp-chip').textContent='Prayed at home';
+  document.getElementById('hp-step1').style.display='none';
+  document.getElementById('hp-step2').style.display='block';
+  renderAllGrids();renderStats();renderLeaderboard();
+}
+function resetHP(){
+  document.getElementById('hp-name').value='';
+  document.getElementById('hp-name-err').style.display='none';
+  document.getElementById('hp-prayer-err').style.display='none';
+  document.querySelectorAll('.hp-btn').forEach(b=>b.classList.remove('on'));
+  hpSalah=null;
+  document.getElementById('hp-step1').style.display='block';
+  document.getElementById('hp-step2').style.display='none';
 }
 
 // ── RENDER ALL ────────────────────────────────────────────────────────────────
@@ -798,7 +984,6 @@ renderAllGrids();
 renderAttList(cur.name,'today-att-list');
 document.getElementById('today-salah-label').textContent=cur.name;
 setDetected();
-renderNotices();
 setInterval(renderClock,30000);
 // Auto-focus name field when check-in tab is opened
 const origSv=window.sv;
@@ -807,6 +992,15 @@ window.sv=function(id,el){
   if(id==='checkin'){
     setDetected();
     setTimeout(()=>{const inp=document.getElementById('ci-name');if(inp)inp.focus();},100);
+  }
+  if(id==='board'){
+    renderNotices();
+    document.getElementById('public-notices').style.display='block';
+    document.getElementById('admin-gate').style.display='none';
+    if(!adminLoggedIn)document.getElementById('admin-panel').style.display='none';
+  }
+  if(id==='home'){
+    setTimeout(()=>{const inp=document.getElementById('hp-name');if(inp)inp.focus();},100);
   }
 };
 </script>
