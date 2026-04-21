@@ -692,11 +692,11 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
 // ── PRAYER TIMES ──────────────────────────────────────────────────────────────
 // SALAHS is built dynamically from API — starts with UK fallback for today
 let SALAHS = [
-  {name:'Fajr',    start:[5,32],  end:[11,41], label:'5:32 AM'},
-  {name:'Zuhr',    start:[11,42], end:[14,27], label:'11:42 AM'},
-  {name:'Asr',     start:[14,28], end:[16,15], label:'2:28 PM'},
-  {name:'Maghrib', start:[16,16], end:[17,50], label:'4:16 PM'},
-  {name:'Isha',    start:[17,51], end:[23,59], label:'5:51 PM'},
+  {name:'Fajr',    start:[4,30],  end:[11,59], label:'4:30 AM'},
+  {name:'Zuhr',    start:[12,0],  end:[14,29], label:'12:00 PM'},
+  {name:'Asr',     start:[14,30], end:[16,29], label:'2:30 PM'},
+  {name:'Maghrib', start:[16,30], end:[17,59], label:'4:30 PM'},
+  {name:'Isha',    start:[18,0],  end:[23,59], label:'6:00 PM'},
 ];
 
 // Fetch real prayer times from Aladhan API (free, no key)
@@ -706,7 +706,7 @@ async function fetchPrayerTimes(){
     const today=new Date();
     const d=today.getDate(),m=today.getMonth()+1,y=today.getFullYear();
     // Method 2 = ISNA, but for UK use method 3 (MWL) — closest to standard UK mosques
-    const url=`https://api.aladhan.com/v1/timings/${d}-${m}-${y}?latitude=50.8543&longitude=0.5735&method=3`;
+    const url=`https://api.aladhan.com/v1/timings/${d}-${m}-${y}?latitude=51.1139&longitude=-0.1876&method=3`;
     const res=await fetch(url);
     const json=await res.json();
     if(json.code!==200)throw new Error('API error');
@@ -862,15 +862,17 @@ function renderInlineQuote(){
 // ── PRAYER CLOCK ──────────────────────────────────────────────────────────────
 function renderClock(){
   const cur=getCurrentSalah(),next=getNextSalah(),diff=minsUntilNext();
+  const cn=document.getElementById('cur-salah-name');
+  if(cn)cn.textContent=cur.name;
   const nw=document.getElementById('cur-window');
   if(nw)nw.textContent=cur.label+(next?" – "+next.label:" – midnight");
   const cd=document.getElementById('countdown');
-  if(cd)cd.innerHTML=`Next: <span style="color:var(--gold);font-weight:500">${next.name}</span> in <span style="color:var(--gold);font-weight:500">${fmtMins(diff)}</span>`;
-  document.getElementById('salah-pills-today').innerHTML=SALAHS.map(s=>{
+  if(cd)cd.innerHTML=`Next: <span>${next.name}</span> in <span>${fmtMins(diff)}</span>`;
+  const pills=document.getElementById('salah-pills-today');
+  if(pills)pills.innerHTML=SALAHS.map(s=>{
     let c='salah-pill';
     const m=curMins();
-    const active=m>=s.start[0]*60+s.start[1]&&m<s.end[0]*60+s.end[1];
-    if(active)c+=' cur';
+    if(m>=s.start[0]*60+s.start[1]&&m<s.end[0]*60+s.end[1])c+=' cur';
     return `<span class="${c}" onclick="selectTodaySalah('${s.name}')">${s.name}</span>`;
   }).join('');
   const b=document.getElementById('qr-badge');if(b)b.textContent=cur.name;
@@ -1629,8 +1631,9 @@ if(SB_URL && SB_KEY){
 
 // ── BOOT ──────────────────────────────────────────────────────────────────────
 initDate();
-fetchPrayerTimes();
+// renderClock once immediately with fallback, then again after API loads
 renderClock();
+fetchPrayerTimes();
 initQuotes();
 initAsma();
 renderInlineQuote();
