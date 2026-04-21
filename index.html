@@ -684,13 +684,53 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
 
 <script>
 // ── PRAYER TIMES ──────────────────────────────────────────────────────────────
-const SALAHS = [
-  {name:'Fajr',    start:[4,45],  end:[6,30],  label:'4:45 – 6:30 AM'},
-  {name:'Zuhr',    start:[13,0],  end:[14,45], label:'1:00 – 2:45 PM'},
-  {name:'Asr',     start:[15,45], end:[18,15], label:'3:45 – 6:15 PM'},
-  {name:'Maghrib', start:[19,30], end:[20,45], label:'7:30 – 8:45 PM'},
-  {name:'Isha',    start:[21,0],  end:[23,59], label:'9:00 PM – midnight'},
+// SALAHS is built dynamically from API — starts with UK fallback for today
+let SALAHS = [
+  {name:'Fajr',    start:[5,32],  end:[11,41], label:'5:32 AM'},
+  {name:'Zuhr',    start:[11,42], end:[14,27], label:'11:42 AM'},
+  {name:'Asr',     start:[14,28], end:[16,15], label:'2:28 PM'},
+  {name:'Maghrib', start:[16,16], end:[17,50], label:'4:16 PM'},
+  {name:'Isha',    start:[17,51], end:[23,59], label:'5:51 PM'},
 ];
+
+// Fetch real prayer times from Aladhan API (free, no key)
+// Uses Hastings, UK coordinates
+async function fetchPrayerTimes(){
+  try{
+    const today=new Date();
+    const d=today.getDate(),m=today.getMonth()+1,y=today.getFullYear();
+    // Method 2 = ISNA, but for UK use method 3 (MWL) — closest to standard UK mosques
+    const url=`https://api.aladhan.com/v1/timings/${d}-${m}-${y}?latitude=50.8543&longitude=0.5735&method=3`;
+    const res=await fetch(url);
+    const json=await res.json();
+    if(json.code!==200)throw new Error('API error');
+    const t=json.data.timings;
+    // Helper: "HH:MM" → [h,m]
+    const parse=str=>{const[h,mi]=str.split(':').map(Number);return[h,mi];};
+    // Helper: [h,m] → display string
+    const fmt=([h,mi])=>{const ap=h>=12?'PM':'AM';const hh=h>12?h-12:h===0?12:h;return `${hh}:${String(mi).padStart(2,'0')} ${ap}`;};
+    const times=[
+      {name:'Fajr',    raw:parse(t.Fajr)},
+      {name:'Zuhr',    raw:parse(t.Dhuhr)},
+      {name:'Asr',     raw:parse(t.Asr)},
+      {name:'Maghrib', raw:parse(t.Maghrib)},
+      {name:'Isha',    raw:parse(t.Isha)},
+    ];
+    // Build SALAHS with proper windows (each ends when next begins, Isha ends midnight)
+    SALAHS=times.map((s,i)=>({
+      name:s.name,
+      start:s.raw,
+      end:i<times.length-1?times[i+1].raw:[23,59],
+      label:fmt(s.raw)
+    }));
+    // Re-render after times update
+    renderClock();
+    renderTimeTable();
+    console.log('Prayer times loaded for Hastings UK');
+  }catch(e){
+    console.warn('Could not fetch prayer times, using fallback:', e.message);
+  }
+}
 
 // ── QUOTES from alislam.org & Huzur (aba) ────────────────────────────────────
 const QUOTES = [
@@ -817,7 +857,7 @@ function renderInlineQuote(){
 function renderClock(){
   const cur=getCurrentSalah(),next=getNextSalah(),diff=minsUntilNext();
   const nw=document.getElementById('cur-window');
-  if(nw)nw.textContent=cur.label;
+  if(nw)nw.textContent=cur.label+(next?" – "+next.label:" – midnight");
   const cd=document.getElementById('countdown');
   if(cd)cd.innerHTML=`Next: <span style="color:var(--gold);font-weight:500">${next.name}</span> in <span style="color:var(--gold);font-weight:500">${fmtMins(diff)}</span>`;
   document.getElementById('salah-pills-today').innerHTML=SALAHS.map(s=>{
@@ -837,9 +877,10 @@ function renderTimeTable(){
   if(!el)return;
   el.innerHTML=SALAHS.map(s=>{
     const isCur=s.name===cur.name;
+    const nextS=SALAHS[SALAHS.indexOf(s)+1];
     return `<tr style="${isCur?'background:rgba(201,168,76,0.05)':''}">
       <td class="tname" style="padding:9px 16px;font-family:'Amiri',serif;font-size:15px;color:var(--gold)">${s.name}</td>
-      <td style="padding:9px 14px;font-size:13px;color:var(--txt2);border-bottom:0.5px solid var(--bdr)">${s.label}</td>
+      <td style="padding:9px 14px;font-size:13px;color:var(--txt2);border-bottom:0.5px solid var(--bdr)">${s.label}${nextS?' – '+nextS.label:' – midnight'}</td>
       <td style="text-align:right;padding:9px 16px;border-bottom:0.5px solid var(--bdr)">${isCur?'<span style="color:var(--green2);font-size:12px">&#9679; Now</span>':'<span style="color:var(--txt3);font-size:12px">—</span>'}</td>
     </tr>`;
   }).join('');
@@ -1531,6 +1572,7 @@ if(SB_URL && SB_KEY){
 
 // ── BOOT ──────────────────────────────────────────────────────────────────────
 initDate();
+fetchPrayerTimes();
 renderClock();
 initQuotes();
 initAsma();
