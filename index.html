@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Khuddam Mosque — Attendance Portal</title>
+<title>Khuddam Attendance Portal</title>
 <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <style>
@@ -18,21 +18,35 @@
 }
 html{scroll-behavior:smooth}
 body{font-family:'Outfit',sans-serif;background:var(--bg);color:var(--txt);min-height:100vh;overflow-x:hidden}
-.geo{position:fixed;inset:0;pointer-events:none;opacity:0.03;z-index:0;
+.geo{position:fixed;inset:0;pointer-events:none;opacity:0.025;z-index:0;
   background-image:repeating-linear-gradient(0deg,transparent,transparent 39px,rgba(201,168,76,0.6) 39px,rgba(201,168,76,0.6) 40px),
   repeating-linear-gradient(90deg,transparent,transparent 39px,rgba(201,168,76,0.6) 39px,rgba(201,168,76,0.6) 40px)}
 
-/* HEADER */
-header{position:relative;z-index:1;padding:1.5rem 1.5rem 1.25rem;text-align:center;border-bottom:0.5px solid var(--bdr)}
-.logo{font-family:'Amiri',serif;font-size:11px;color:var(--gold3);letter-spacing:4px;text-transform:uppercase;margin-bottom:4px}
-.app-title{font-family:'Amiri',serif;font-size:30px;font-weight:700;color:var(--gold)}
+/* HERO */
+.mosque-hero{position:relative;width:100%;height:280px;overflow:hidden;z-index:1}
+.hero-img{width:100%;height:100%;object-fit:cover;object-position:center 40%;display:block;filter:brightness(0.45) saturate(0.8)}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(to bottom,rgba(10,15,26,0.2) 0%,rgba(10,15,26,0.7) 70%,rgba(10,15,26,1) 100%)}
+.hero-content{position:absolute;bottom:0;left:0;right:0;padding:1.5rem;text-align:center}
+.logo{font-family:'Amiri',serif;font-size:11px;color:var(--gold3);letter-spacing:4px;text-transform:uppercase;margin-bottom:5px}
+.app-title{font-family:'Amiri',serif;font-size:32px;font-weight:700;color:var(--gold);line-height:1.1}
 .app-sub{font-size:11px;color:var(--txt2);margin-top:3px;letter-spacing:1px}
-.date-pill{display:inline-flex;align-items:center;gap:8px;margin-top:12px;background:var(--s2);border:0.5px solid var(--bdr);border-radius:20px;padding:5px 16px;font-size:12px;color:var(--txt2)}
+.date-pill{display:inline-flex;align-items:center;gap:8px;margin-top:10px;background:rgba(10,15,26,0.6);border:0.5px solid var(--bdr);border-radius:20px;padding:5px 16px;font-size:12px;color:var(--txt2);backdrop-filter:blur(4px)}
 .live-dot{display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--green2);animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:0.4;transform:scale(0.7)}}
 
+/* QUOTE TICKER */
+.quote-ticker{background:var(--s1);border-top:0.5px solid var(--bdr);border-bottom:0.5px solid var(--bdr);padding:0;overflow:hidden;position:relative;z-index:1}
+.quote-inner{padding:0.9rem 1.5rem;text-align:center;transition:opacity 0.6s ease}
+.quote-source{font-size:10px;color:var(--gold3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:5px}
+.quote-arabic{font-family:'Amiri',serif;font-size:17px;color:var(--gold);direction:rtl;margin-bottom:5px;line-height:1.5}
+.quote-text{font-size:13px;color:var(--txt2);line-height:1.65;font-style:italic;max-width:640px;margin:0 auto}
+.quote-attr{font-size:11px;color:var(--gold3);margin-top:5px}
+.quote-dots{display:flex;justify-content:center;gap:5px;margin-top:8px}
+.qdot{width:5px;height:5px;border-radius:50%;background:var(--bdr2);cursor:pointer;transition:background 0.2s}
+.qdot.on{background:var(--gold)}
+
 /* NAV */
-nav{display:flex;justify-content:center;gap:4px;padding:1rem 1rem;position:relative;z-index:1;flex-wrap:wrap}
+nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:relative;z-index:1;flex-wrap:wrap;border-bottom:0.5px solid var(--bdr)}
 .nb{padding:7px 16px;border-radius:20px;border:0.5px solid var(--bdr);background:transparent;color:var(--txt2);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s}
 .nb.on{background:var(--gold);color:#0a0f1a;border-color:var(--gold);font-weight:500}
 .nb:hover:not(.on){border-color:var(--bdr2);color:var(--txt)}
@@ -88,6 +102,12 @@ nav{display:flex;justify-content:center;gap:4px;padding:1rem 1rem;position:relat
 .tname{font-family:'Amiri',serif;font-size:15px;color:var(--gold)}
 .twin{color:var(--txt2)}
 .tcur{background:rgba(201,168,76,0.05)}
+
+/* INLINE QUOTE CARD (shown in Today view) */
+.inline-quote{background:var(--s1);border:0.5px solid var(--bdr2);border-left:3px solid var(--gold);border-radius:0 12px 12px 0;padding:1rem 1.25rem;margin-bottom:1.25rem}
+.iq-label{font-size:10px;color:var(--gold3);letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px}
+.iq-text{font-size:13px;color:var(--txt2);line-height:1.7;font-style:italic}
+.iq-attr{font-size:11px;color:var(--gold3);margin-top:6px}
 
 /* CHECK-IN FORM */
 .form-card{background:var(--s1);border:0.5px solid var(--bdr2);border-radius:16px;padding:1.5rem;margin-bottom:1rem}
@@ -175,17 +195,34 @@ nav{display:flex;justify-content:center;gap:4px;padding:1rem 1rem;position:relat
 <body>
 <div class="geo"></div>
 
-<header>
-  <div class="logo">Khuddam Mosque</div>
-  <div class="app-title">Attendance Portal</div>
-  <div class="app-sub">One QR · Auto-detects prayer · Tracks Quran reading</div>
-  <div class="date-pill">
-    <span class="live-dot"></span>
-    <span id="greg-date"></span>
-    &nbsp;·&nbsp;
-    <span id="hijri-display">Shawwal 1446 AH</span>
+<!-- HERO WITH MOSQUE IMAGE -->
+<div class="mosque-hero">
+  <img src="https://www.alislam.org/wp-content/uploads/2019/11/Prayer-Salat-Mubarak-Mosque-Islamabad.jpg"
+       alt="Mubarak Mosque Islamabad" class="hero-img"
+       onerror="this.parentElement.style.minHeight='200px';this.style.display='none'">
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="logo">Majlis Khuddamul Ahmadiyya</div>
+    <div class="app-title">Attendance Portal</div>
+    <div class="app-sub">One QR · Auto-detects prayer · Tracks Quran reading</div>
+    <div class="date-pill">
+      <span class="live-dot"></span>
+      <span id="greg-date"></span>
+      &nbsp;·&nbsp;
+      <span id="hijri-display">Shawwal 1446 AH</span>
+    </div>
   </div>
-</header>
+</div>
+
+<!-- ROTATING QUOTE BANNER -->
+<div class="quote-ticker">
+  <div class="quote-inner" id="quote-inner">
+    <div class="quote-source" id="q-source"></div>
+    <div class="quote-text" id="q-text"></div>
+    <div class="quote-attr" id="q-attr"></div>
+    <div class="quote-dots" id="q-dots"></div>
+  </div>
+</div>
 
 <nav>
   <button class="nb on"  onclick="sv('today',this)">Today</button>
@@ -197,13 +234,19 @@ nav{display:flex;justify-content:center;gap:4px;padding:1rem 1rem;position:relat
 
 <!-- ===== TODAY ===== -->
 <div class="view on" id="v-today">
-  <p class="sec">Current prayer window</p>
+  <p class="sec" style="margin-top:1rem">Current prayer window</p>
   <div class="prayer-clock">
     <div style="font-size:11px;color:var(--txt2);margin-bottom:4px"><span class="live-dot"></span> Now active</div>
     <div class="now-salah" id="cur-salah-name">—</div>
     <div class="now-window" id="cur-window">—</div>
     <div class="salah-pills" id="salah-pills-today"></div>
     <div class="countdown">Next: <span id="next-name">—</span> in <span id="next-in">—</span></div>
+  </div>
+
+  <div class="inline-quote" id="inline-quote">
+    <div class="iq-label">Guidance on Salah</div>
+    <div class="iq-text" id="iq-text"></div>
+    <div class="iq-attr" id="iq-attr"></div>
   </div>
 
   <p class="sec">Attendance — <span id="today-salah-label">select a prayer</span></p>
@@ -213,7 +256,7 @@ nav{display:flex;justify-content:center;gap:4px;padding:1rem 1rem;position:relat
 
 <!-- ===== QR ===== -->
 <div class="view" id="v-qr">
-  <p class="sec">The permanent QR code</p>
+  <p class="sec" style="margin-top:1rem">The permanent QR code</p>
   <div class="qr-panel">
     <div class="qr-inner">
       <div class="qr-frame">
@@ -222,13 +265,13 @@ nav{display:flex;justify-content:center;gap:4px;padding:1rem 1rem;position:relat
       </div>
       <div class="qr-right">
         <div class="qr-title">One QR, forever</div>
-        <div class="qr-desc">Print this and place it in the mosque. The URL never changes. The app detects which prayer it is automatically from the time of day when someone scans.</div>
-        <div class="qr-url">https://mosque-attendance.github.io/checkin</div>
-        <div class="url-note">URL is permanent — print once, never reprint</div>
+        <div class="qr-desc">Print this and place it in the mosque. The URL never changes. The system automatically detects which prayer is active when someone scans.</div>
+        <div class="qr-url">https://shahzebsahmed-sketch.github.io/mosque-attendance/</div>
+        <div class="url-note">Permanent URL — print once, never reprint</div>
       </div>
     </div>
     <div class="how-works">
-      <strong>How it works:</strong> Each Salah has a time window. When a Khadim scans, the app reads the device clock, finds the active prayer, and pre-fills the form. No new QR per prayer, no admin action needed. They can still change the prayer if catching up a missed one.
+      <strong>How it works:</strong> Each Salah has a time window. When a Khadim scans, the app reads the device clock and pre-fills the correct prayer automatically. They can still change it if catching up a missed one.
     </div>
   </div>
 
@@ -237,14 +280,14 @@ nav{display:flex;justify-content:center;gap:4px;padding:1rem 1rem;position:relat
     <table class="time-tbl" id="time-tbl"></table>
   </div>
 
-  <p class="sec" style="margin-top:1.5rem">Attendance by prayer today</p>
+  <p class="sec">Attendance by prayer today</p>
   <div class="salah-grid" id="qr-salah-grid"></div>
 </div>
 
 <!-- ===== CHECK IN ===== -->
 <div class="view" id="v-checkin">
+  <p class="sec" style="margin-top:1rem">Mark your attendance</p>
   <div class="form-card" id="form-wrap">
-    <p class="sec" style="margin-bottom:1rem">Attendance check-in</p>
     <div class="det-banner">
       <div class="det-icon">&#9650;</div>
       <div class="det-text">Prayer auto-detected: <strong id="det-salah">—</strong>&nbsp;&nbsp;<span id="det-time" style="font-size:11px"></span></div>
@@ -268,14 +311,9 @@ nav{display:flex;justify-content:center;gap:4px;padding:1rem 1rem;position:relat
     <div class="field">
       <label>Prayer (auto-filled — editable)</label>
       <select id="f-salah">
-        <option>Fajr</option>
-        <option>Zuhr</option>
-        <option>Asr</option>
-        <option>Maghrib</option>
-        <option>Isha</option>
+        <option>Fajr</option><option>Zuhr</option><option>Asr</option><option>Maghrib</option><option>Isha</option>
       </select>
     </div>
-
     <div class="quran-box">
       <div class="quran-lbl">Quran reading today</div>
       <div class="field" style="margin-bottom:10px">
@@ -303,10 +341,8 @@ nav{display:flex;justify-content:center;gap:4px;padding:1rem 1rem;position:relat
         </div>
       </div>
     </div>
-
     <button class="btn-primary" onclick="submitForm()">Confirm Attendance</button>
   </div>
-
   <div class="success-card" id="success-wrap">
     <div class="suc-ring">&#10003;</div>
     <div class="suc-title">Jazakallah Khair!</div>
@@ -318,31 +354,29 @@ nav{display:flex;justify-content:center;gap:4px;padding:1rem 1rem;position:relat
 
 <!-- ===== STATS ===== -->
 <div class="view" id="v-stats">
-  <p class="sec">This week at a glance</p>
+  <p class="sec" style="margin-top:1rem">This week at a glance</p>
   <div class="stats-grid">
     <div class="stat-card"><div class="stat-num" id="st-total">0</div><div class="stat-lbl">Total attendances</div></div>
     <div class="stat-card"><div class="stat-num" id="st-avg">0</div><div class="stat-lbl">Avg per Salah</div></div>
     <div class="stat-card"><div class="stat-num" id="st-top">—</div><div class="stat-lbl">Most attended</div></div>
     <div class="stat-card"><div class="stat-num" id="st-quran">0</div><div class="stat-lbl">Read Quran today</div></div>
   </div>
-
   <div class="chart-wrap">
     <p class="sec" style="margin-bottom:0">7-day attendance</p>
     <div class="chart-bars" id="weekly-bars"></div>
   </div>
-
   <p class="sec">Leaderboard — top Khudam</p>
-  <div id="leaderboard"></div>
+  <div id="leaderboard"><div class="empty-state">No data yet — be the first to check in!</div></div>
 </div>
 
 <!-- ===== NOTICE BOARD ===== -->
 <div class="view" id="v-board">
-  <p class="sec">Announcements</p>
+  <p class="sec" style="margin-top:1rem">Announcements</p>
   <div id="notices"></div>
 </div>
 
 <script>
-// ── PRAYER TIMES (24h, adjust to your mosque location) ──────────────────────
+// ── PRAYER TIMES ──────────────────────────────────────────────────────────────
 const SALAHS = [
   {name:'Fajr',    start:[4,45],  end:[6,30],  label:'4:45 – 6:30 AM'},
   {name:'Zuhr',    start:[13,0],  end:[14,45], label:'1:00 – 2:45 PM'},
@@ -351,62 +385,114 @@ const SALAHS = [
   {name:'Isha',    start:[21,0],  end:[23,59], label:'9:00 PM – midnight'},
 ];
 
-// ── DATA STORE (resets on page refresh — backend needed for persistence) ────
+// ── QUOTES from alislam.org & Huzur (aba) ────────────────────────────────────
+const QUOTES = [
+  {
+    source:'Hazrat Mirza Masroor Ahmad (aba) — Khalifatul Masih V',
+    text:'"No matter what happens, do not miss your prayers."',
+    attr:'— Address to Khuddam, January 2024'
+  },
+  {
+    source:'Hazrat Mirza Ghulam Ahmad (as) — The Promised Messiah',
+    text:'"Salat is the best educator and the most excellent means of teaching perfect servitude. Be dutiful to Salat in such a way that, not only your body or tongue, but also all the intentions and passions of your soul entirely become Salat."',
+    attr:'— Malfuzat Vol. 1, p. 108 · alislam.org'
+  },
+  {
+    source:'Hazrat Mirza Ghulam Ahmad (as) — The Promised Messiah',
+    text:'"Salat is a treasure trove of supplications granted to a believer. Salat is a pinnacle (mi\'raj) of the believer and from that does he get satisfaction of heart."',
+    attr:'— Malfuzat Vol. 2, p. 348 · alislam.org'
+  },
+  {
+    source:'Hazrat Mirza Ghulam Ahmad (as) — The Promised Messiah',
+    text:'"Offer Prayers with commitment to regularity. Some people offer only one of the daily Prayers. They should remember that there is no exemption from Prayers."',
+    attr:'— Malfuzat Vol. 1, p. 172 · alislam.org'
+  },
+  {
+    source:'Hazrat Mirza Ghulam Ahmad (as) — The Promised Messiah',
+    text:'"He who wants to meet Allah and desires to reach His court, Salat is the vehicle by which he can get there quicker. He who abandons Salat cannot reach there."',
+    attr:'— Malfuzat Vol. 3, p. 189 · alislam.org'
+  },
+  {
+    source:'Holy Quran — Surah Al-Baqarah (2:3)',
+    text:'"Who believe in the unseen and observe Prayer, and spend out of what We have provided for them."',
+    attr:'— alislam.org · The Holy Quran'
+  },
+  {
+    source:'Hazrat Mirza Ghulam Ahmad (as) — The Promised Messiah',
+    text:'"Perpetuate love for, and grandeur of, God in your hearts; and there is nothing more effective for that than Salat."',
+    attr:'— Malfuzat Vol. 2, p. 681 · alislam.org'
+  },
+  {
+    source:'Hazrat Mirza Ghulam Ahmad (as) — The Promised Messiah',
+    text:'"Salat, in fact, is a supplication to the Lord of Glory, without which one cannot survive nor get security and happiness."',
+    attr:'— Malfuzat Vol. 2, p. 615 · alislam.org'
+  },
+  {
+    source:'Hazrat Mirza Masroor Ahmad (aba) — Khalifatul Masih V',
+    text:'"The progress of a nation depends entirely upon its youth. If the youth carry forward their traditions in the right manner, then that nation can survive for a long time."',
+    attr:'— Message to Khuddamul Ahmadiyya · alislam.org'
+  },
+  {
+    source:'Hazrat Mirza Ghulam Ahmad (as) — The Promised Messiah',
+    text:'"Salat is an instrument for security against sins. Salat is the essence of blessings. Favours of Allah are attained through the Salat. Therefore, perform it decently that you may inherit Allah\'s blessings."',
+    attr:'— Malfuzat Vol. 3, p. 103 · alislam.org'
+  },
+];
+
+// ── DATA STORE ────────────────────────────────────────────────────────────────
 let ATT = {Fajr:[],Zuhr:[],Asr:[],Maghrib:[],Isha:[]};
 let todaySelected = null;
 let quranRead = null;
 let qrReady = false;
+let quoteIdx = 0;
+let quoteTimer = null;
 
-// ── SEED DATA ───────────────────────────────────────────────────────────────
-const SEED = [
-  {name:'Ahmed Khan',    role:'Khadim',            streak:14, quran:'6 pages'},
-  {name:'Usman Ali',     role:'Nazim',             streak:21, quran:''},
-  {name:'Ibrahim Malik', role:'Qaid',              streak:7,  quran:'1 Ruku'},
-  {name:'Yusuf Raza',    role:'Khadim',            streak:9,  quran:'10 pages'},
-  {name:'Bilal Sheikh',  role:'Waqar-e-Amal',      streak:18, quran:''},
-  {name:'Tariq Hassan',  role:'Khadim',            streak:5,  quran:'3 pages'},
-  {name:'Hamza Chaudhry',role:'Nazim',             streak:3,  quran:''},
-];
-function seedData(){
-  ATT.Fajr    = [SEED[0],SEED[1],SEED[2],SEED[5]];
-  ATT.Zuhr    = [SEED[1],SEED[3],SEED[4]];
-  ATT.Asr     = [SEED[0],SEED[1],SEED[6]];
-  ATT.Maghrib = [SEED[2],SEED[5]];
-  ATT.Isha    = [SEED[0],SEED[1],SEED[3],SEED[4],SEED[6]];
-}
-
-// ── HELPERS ──────────────────────────────────────────────────────────────────
+// ── HELPERS ───────────────────────────────────────────────────────────────────
 function initials(n){return n.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}
 function curMins(){const n=new Date();return n.getHours()*60+n.getMinutes()}
 function getCurrentSalah(){
   const m=curMins();
-  for(const s of SALAHS){
-    if(m>=s.start[0]*60+s.start[1] && m<s.end[0]*60+s.end[1]) return s;
-  }
-  return SALAHS[4]; // default to Isha if outside all windows
+  for(const s of SALAHS){if(m>=s.start[0]*60+s.start[1]&&m<s.end[0]*60+s.end[1])return s;}
+  return SALAHS[4];
 }
-function getNextSalah(){
-  const idx=SALAHS.findIndex(s=>s.name===getCurrentSalah().name);
-  return SALAHS[(idx+1)%SALAHS.length];
-}
-function minsUntilNext(){
-  const next=getNextSalah();
-  let diff=next.start[0]*60+next.start[1]-curMins();
-  if(diff<0)diff+=24*60;
-  return diff;
-}
+function getNextSalah(){return SALAHS[(SALAHS.findIndex(s=>s.name===getCurrentSalah().name)+1)%SALAHS.length]}
+function minsUntilNext(){let d=getNextSalah().start[0]*60+getNextSalah().start[1]-curMins();if(d<0)d+=1440;return d}
 function fmtMins(m){const h=Math.floor(m/60),mm=m%60;return h>0?`${h}h ${mm}m`:`${mm}m`}
 function maxAtt(){return Math.max(1,...SALAHS.map(s=>ATT[s.name].length))}
 
-// ── INIT DATE ────────────────────────────────────────────────────────────────
+// ── DATE ──────────────────────────────────────────────────────────────────────
 function initDate(){
-  const d=new Date();
-  document.getElementById('greg-date').textContent=d.toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  document.getElementById('greg-date').textContent=new Date().toLocaleDateString('en-GB',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
 }
 
-// ── PRAYER CLOCK ─────────────────────────────────────────────────────────────
+// ── QUOTES ────────────────────────────────────────────────────────────────────
+function renderQuote(idx){
+  const q=QUOTES[idx];
+  const inner=document.getElementById('quote-inner');
+  inner.style.opacity='0';
+  setTimeout(()=>{
+    document.getElementById('q-source').textContent=q.source;
+    document.getElementById('q-text').textContent=q.text;
+    document.getElementById('q-attr').textContent=q.attr;
+    const dotsEl=document.getElementById('q-dots');
+    dotsEl.innerHTML=QUOTES.map((_,i)=>`<span class="qdot ${i===idx?'on':''}" onclick="jumpQuote(${i})"></span>`).join('');
+    inner.style.opacity='1';
+  },300);
+}
+function jumpQuote(idx){quoteIdx=idx;renderQuote(idx);resetQuoteTimer();}
+function resetQuoteTimer(){clearInterval(quoteTimer);quoteTimer=setInterval(()=>{quoteIdx=(quoteIdx+1)%QUOTES.length;renderQuote(quoteIdx);},8000);}
+function initQuotes(){renderQuote(0);resetQuoteTimer();}
+
+// ── INLINE QUOTE (rotates on Today tab) ──────────────────────────────────────
+function renderInlineQuote(){
+  const q=QUOTES[Math.floor(Math.random()*QUOTES.length)];
+  document.getElementById('iq-text').textContent=q.text;
+  document.getElementById('iq-attr').textContent=q.source+' '+q.attr;
+}
+
+// ── PRAYER CLOCK ──────────────────────────────────────────────────────────────
 function renderClock(){
-  const cur=getCurrentSalah(), next=getNextSalah(), diff=minsUntilNext();
+  const cur=getCurrentSalah(),next=getNextSalah(),diff=minsUntilNext();
   document.getElementById('cur-salah-name').textContent=cur.name;
   document.getElementById('cur-window').textContent=cur.label;
   document.getElementById('next-name').textContent=next.name;
@@ -418,11 +504,10 @@ function renderClock(){
     else if(i<curIdx)c+=' done';
     return `<span class="${c}">${s.name}</span>`;
   }).join('');
-  const b=document.getElementById('qr-badge');
-  if(b)b.textContent=cur.name;
+  const b=document.getElementById('qr-badge');if(b)b.textContent=cur.name;
 }
 
-// ── TIME TABLE ───────────────────────────────────────────────────────────────
+// ── TIME TABLE ────────────────────────────────────────────────────────────────
 function renderTimeTable(){
   const cur=getCurrentSalah();
   document.getElementById('time-tbl').innerHTML=SALAHS.map(s=>{
@@ -436,16 +521,13 @@ function renderTimeTable(){
 }
 
 // ── SALAH GRID ────────────────────────────────────────────────────────────────
-function renderSalahGrid(containerId, onClickFn, activeSalah){
-  const g=document.getElementById(containerId);
-  if(!g)return;
+function renderSalahGrid(containerId,onClickFn,activeSalah){
+  const g=document.getElementById(containerId);if(!g)return;
   const mx=maxAtt();
   g.innerHTML=SALAHS.map(s=>{
-    const cnt=ATT[s.name].length;
-    const qCnt=ATT[s.name].filter(p=>p.quran).length;
+    const cnt=ATT[s.name].length,qCnt=ATT[s.name].filter(p=>p.quran).length;
     const pct=Math.round(cnt/mx*100);
-    const isAct=s.name===activeSalah;
-    return `<div class="salah-card ${isAct?'active-s':''}" onclick="${onClickFn}('${s.name}')">
+    return `<div class="salah-card ${s.name===activeSalah?'active-s':''}" onclick="${onClickFn}('${s.name}')">
       <div class="sc-name">${s.name}</div>
       <div class="sc-time">${s.label.split('–')[0].trim()}</div>
       <div class="sc-count">${cnt}</div>
@@ -457,24 +539,20 @@ function renderSalahGrid(containerId, onClickFn, activeSalah){
 }
 
 // ── ATTENDEE LIST ─────────────────────────────────────────────────────────────
-function renderAttList(salahName, containerId){
-  const el=document.getElementById(containerId);
-  if(!el)return;
+function renderAttList(salahName,containerId){
+  const el=document.getElementById(containerId);if(!el)return;
   const ppl=ATT[salahName]||[];
-  if(!ppl.length){el.innerHTML='<div class="empty-state">No attendees recorded yet for '+salahName+'</div>';return;}
+  if(!ppl.length){el.innerHTML=`<div class="empty-state">No attendees yet for ${salahName}</div>`;return;}
   el.innerHTML=ppl.map(p=>`
     <div class="att-row">
       <div class="av">${initials(p.name)}</div>
-      <div class="att-info">
-        <div class="att-name">${p.name}</div>
-        <div class="att-meta">${p.role}</div>
-      </div>
+      <div class="att-info"><div class="att-name">${p.name}</div><div class="att-meta">${p.role}</div></div>
       ${p.streak?`<div class="streak-badge">&#9733; ${p.streak}d</div>`:''}
       ${p.quran?`<div class="att-quran">${p.quran}</div>`:''}
     </div>`).join('');
 }
 
-// ── TODAY VIEW ────────────────────────────────────────────────────────────────
+// ── TODAY SELECT ──────────────────────────────────────────────────────────────
 function selectTodaySalah(name){
   todaySelected=name;
   document.getElementById('today-salah-label').textContent=name;
@@ -482,37 +560,29 @@ function selectTodaySalah(name){
   renderAttList(name,'today-att-list');
 }
 
-// ── QR VIEW ──────────────────────────────────────────────────────────────────
+// ── QR ────────────────────────────────────────────────────────────────────────
 function initQR(){
   if(qrReady)return;
-  const box=document.getElementById('qr-render');
-  box.innerHTML='';
+  const box=document.getElementById('qr-render');box.innerHTML='';
   try{
-    new QRCode(box,{
-      text:'https://mosque-attendance.github.io/checkin',
-      width:104,height:104,
-      colorDark:'#0a0f1a',colorLight:'#ffffff',
-      correctLevel:QRCode.CorrectLevel.M
-    });
+    new QRCode(box,{text:'https://shahzebsahmed-sketch.github.io/mosque-attendance/',width:104,height:104,colorDark:'#0a0f1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
     qrReady=true;
-  }catch(e){box.innerHTML='<div style="font-size:10px;color:#888;text-align:center;padding:8px">QR code</div>';}
+  }catch(e){box.innerHTML='<div style="font-size:10px;color:#888;padding:8px">QR code</div>';}
 }
 
-// ── CHECK-IN FORM ─────────────────────────────────────────────────────────────
+// ── CHECK-IN ──────────────────────────────────────────────────────────────────
 function setDetected(){
   const cur=getCurrentSalah();
   document.getElementById('det-salah').textContent=cur.name;
   document.getElementById('det-time').textContent=cur.label;
   document.getElementById('f-salah').value=cur.name;
 }
-
 function setQ(val,el){
   quranRead=val;
   document.querySelectorAll('.tog').forEach(t=>t.classList.remove('on'));
   el.classList.add('on');
   document.getElementById('quran-details').style.display=(val==='yes'||val==='partial')?'block':'none';
 }
-
 function submitForm(){
   const name=document.getElementById('f-name').value.trim();
   const errEl=document.getElementById('name-err');
@@ -540,18 +610,14 @@ function submitForm(){
   if(quranStr)tags.innerHTML+=`<span class="suc-tag quran">Quran: ${quranStr}</span>`;
   document.getElementById('form-wrap').style.display='none';
   document.getElementById('success-wrap').style.display='block';
-  renderAllGrids();
-  renderStats();
-  renderLeaderboard();
+  renderAllGrids();renderStats();renderLeaderboard();
 }
-
 function resetForm(){
   ['f-name','f-pages','f-ruku','f-surah'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
   document.getElementById('quran-details').style.display='none';
   document.querySelectorAll('.tog').forEach(t=>t.classList.remove('on'));
   document.getElementById('name-err').style.display='none';
-  quranRead=null;
-  setDetected();
+  quranRead=null;setDetected();
   document.getElementById('form-wrap').style.display='block';
   document.getElementById('success-wrap').style.display='none';
 }
@@ -569,19 +635,17 @@ function renderStats(){
   document.getElementById('st-quran').textContent=quranToday;
   renderWeeklyChart();
 }
-
 function renderWeeklyChart(){
   const days=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
-  const vals=[8,12,6,15,10,18,14];
-  const mx=Math.max(...vals);
+  const vals=[0,0,0,0,0,0,0];
+  const mx=Math.max(1,...vals);
   document.getElementById('weekly-bars').innerHTML=days.map((d,i)=>`
     <div class="bar-wrap">
       <div class="bar-val">${vals[i]}</div>
-      <div class="bar" style="height:${Math.round(vals[i]/mx*76)+6}px;background:${i===6?'var(--gold)':'var(--gold3)'}"></div>
+      <div class="bar" style="height:${Math.round(vals[i]/mx*76)+4}px;background:${i===6?'var(--gold)':'var(--gold3)'}"></div>
       <div class="bar-lbl">${d}</div>
     </div>`).join('');
 }
-
 function renderLeaderboard(){
   const all=[];
   SALAHS.forEach(s=>ATT[s.name].forEach(p=>{
@@ -600,17 +664,17 @@ function renderLeaderboard(){
         <div class="rank-meta">${p.sessions} prayers · ${p.role}${p.quran?' · Quran: '+p.quran:''}</div>
       </div>
       <div class="rank-streak">&#9733; ${p.streak}d</div>
-    </div>`).join(''):'<div class="empty-state">No data yet</div>';
+    </div>`).join(''):'<div class="empty-state">No data yet — be the first to check in!</div>';
 }
 
 // ── NOTICE BOARD ──────────────────────────────────────────────────────────────
 function renderNotices(){
   const notices=[
-    {tag:'event',   tagLabel:'Event',    title:'Monthly Ijtema — Saturday 26th April',     body:'All Khudam are requested to attend the monthly Ijtema after Fajr. Refreshments will be provided. Attendance is compulsory for all local Khudam.',          date:'Posted 2 days ago'},
-    {tag:'reminder',tagLabel:'Reminder', title:'Daily Salah target: all 5 prayers',         body:'The Qaid has set a weekly target of attending all 5 daily prayers. Your streaks are tracked automatically through the attendance system.',                   date:'Posted 4 days ago'},
-    {tag:'info',    tagLabel:'Info',     title:'New QR check-in system now live',            body:'Attendance is now recorded by scanning the QR code at the entrance. If you forget to scan, use the Check In tab and select the correct prayer manually.', date:'Posted 1 week ago'},
-    {tag:'reminder',tagLabel:'Reminder', title:'Quran reading — log your daily tilawat',    body:'The check-in form now includes a section to log your Quran reading. Please record your pages and Ruku each day so your tilawat progress can be tracked.', date:'Posted 1 week ago'},
-    {tag:'event',   tagLabel:'Event',    title:'Waqar-e-Amal this Sunday after Fajr',       body:'All Khudam are invited to participate in this Sunday\'s Waqar-e-Amal (voluntary community service). Meet at the mosque entrance after Fajr prayer.',      date:'Posted 10 days ago'},
+    {tag:'event',   tagLabel:'Event',    title:'Monthly Ijtema — Saturday 26th April',   body:'All Khudam are requested to attend the monthly Ijtema after Fajr. Refreshments will be provided. Attendance is compulsory for all local Khudam.', date:'Posted 2 days ago'},
+    {tag:'reminder',tagLabel:'Reminder', title:'Daily Salah target: all 5 prayers',       body:'The Qaid has set a weekly target of attending all 5 daily prayers. Huzur (aba) reminds us: "No matter what happens, do not miss your prayers."',  date:'Posted 4 days ago'},
+    {tag:'info',    tagLabel:'Info',     title:'QR check-in system now live',              body:'Scan the QR code at the entrance to mark your attendance. If you forget, use the Check In tab and select the correct prayer manually.',            date:'Posted 1 week ago'},
+    {tag:'reminder',tagLabel:'Reminder', title:'Log your daily Quran tilawat',             body:'The check-in form includes a section to log your Quran reading. Please record your pages and Ruku each day so your tilawat progress is tracked.', date:'Posted 1 week ago'},
+    {tag:'event',   tagLabel:'Event',    title:'Waqar-e-Amal this Sunday after Fajr',     body:'All Khudam are invited to participate in this Sunday\'s voluntary community service. Meet at the mosque entrance after Fajr prayer.',             date:'Posted 10 days ago'},
   ];
   document.getElementById('notices').innerHTML=notices.map(n=>`
     <div class="notice-card">
@@ -621,7 +685,7 @@ function renderNotices(){
     </div>`).join('');
 }
 
-// ── RENDER ALL GRIDS ──────────────────────────────────────────────────────────
+// ── RENDER ALL ────────────────────────────────────────────────────────────────
 function renderAllGrids(){
   renderSalahGrid('today-salah-grid','selectTodaySalah',todaySelected);
   renderSalahGrid('qr-salah-grid','selectTodaySalah',todaySelected);
@@ -638,10 +702,11 @@ function sv(id,el){
   if(id==='stats'){renderStats();renderLeaderboard();}
 }
 
-// ── BOOTSTRAP ─────────────────────────────────────────────────────────────────
+// ── BOOT ──────────────────────────────────────────────────────────────────────
 initDate();
-seedData();
 renderClock();
+initQuotes();
+renderInlineQuote();
 const cur=getCurrentSalah();
 todaySelected=cur.name;
 renderAllGrids();
@@ -649,7 +714,7 @@ renderAttList(cur.name,'today-att-list');
 document.getElementById('today-salah-label').textContent=cur.name;
 setDetected();
 renderNotices();
-setInterval(renderClock, 30000);
+setInterval(renderClock,30000);
 </script>
 </body>
 </html>
