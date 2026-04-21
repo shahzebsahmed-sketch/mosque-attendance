@@ -1173,6 +1173,127 @@ function renderLiveNamesTable(){
   }
 }
 
+// ── LEADERBOARD ──────────────────────────────────────────────────────────────
+function renderLeaderboard(){
+  const el=document.getElementById('leaderboard');
+  if(!el)return;
+  const all={};
+  Object.values(HISTORY).forEach(dayData=>{
+    SALAHS.forEach(s=>{
+      (dayData[s.name]||[]).forEach(p=>{
+        const key=p.name.toLowerCase();
+        if(!all[key])all[key]={name:p.name,sessions:0,mosque:0,home:0,quran:''};
+        all[key].sessions++;
+        if(p.location==='home')all[key].home++;else all[key].mosque++;
+        if(p.quran)all[key].quran=p.quran;
+      });
+    });
+  });
+  const top=Object.values(all).sort((a,b)=>b.sessions-a.sessions).slice(0,8);
+  el.innerHTML=top.length?top.map((p,i)=>`
+    <div class="rank-row">
+      <div class="rank-num ${i<3?'top':''}">${i===0?'★':i+1}</div>
+      <div class="av" style="width:30px;height:30px;font-size:10px">${initials(p.name)}</div>
+      <div class="rank-info">
+        <div class="rank-name">${p.name}</div>
+        <div class="rank-meta">${p.sessions} prayers · ${p.mosque} mosque · ${p.home} home${p.quran?' · Quran: '+p.quran:''}</div>
+      </div>
+      <div class="rank-streak" style="font-size:11px;text-align:right">${p.sessions}<br><span style="font-size:9px;color:var(--txt3)">total</span></div>
+    </div>`).join(''):'<div class="empty-state">No data yet — be the first to check in!</div>';
+}
+
+// ── NOTICE BOARD ──────────────────────────────────────────────────────────────
+let NOTICES = [];
+const ADMIN_PASS = 'admin123';
+let adminLoggedIn = false;
+
+function renderNotices(){
+  const el=document.getElementById('notices-list');
+  if(!el)return;
+  const tagLabel={event:'Event',reminder:'Reminder',info:'Info'};
+  if(!NOTICES.length){
+    el.innerHTML=`<div class="empty-state" style="padding:3rem 1rem">
+      <div style="font-size:28px;margin-bottom:12px;opacity:0.3">&#128226;</div>
+      <div style="font-size:14px;color:var(--txt2);margin-bottom:4px">No announcements yet</div>
+      <div style="font-size:12px;color:var(--txt3)">Check back soon</div>
+    </div>`;
+    return;
+  }
+  el.innerHTML=NOTICES.map(n=>`
+    <div class="notice-card">
+      <span class="notice-tag tag-${n.tag}">${tagLabel[n.tag]||n.tag}</span>
+      <div class="notice-title">${n.title}</div>
+      <div class="notice-body">${n.body}</div>
+      <div class="notice-date">${n.date}</div>
+    </div>`).join('');
+}
+
+function renderAdminNotices(){
+  const el=document.getElementById('admin-notices-list');
+  if(!el)return;
+  const tagLabel={event:'Event',reminder:'Reminder',info:'Info'};
+  if(!NOTICES.length){el.innerHTML='<div class="empty-state">No notices posted yet</div>';return;}
+  el.innerHTML=NOTICES.map((n,i)=>`
+    <div class="notice-card" style="position:relative">
+      <span class="notice-tag tag-${n.tag}">${tagLabel[n.tag]||n.tag}</span>
+      <button onclick="deleteNotice(${i})" style="position:absolute;top:10px;right:10px;background:rgba(226,75,74,0.1);border:0.5px solid rgba(226,75,74,0.3);color:var(--red);border-radius:6px;padding:3px 10px;font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif">Delete</button>
+      <div class="notice-title">${n.title}</div>
+      <div class="notice-body">${n.body}</div>
+      <div class="notice-date">${n.date}</div>
+    </div>`).join('');
+}
+
+function showAdminGate(){
+  document.getElementById('public-notices').style.display='none';
+  if(adminLoggedIn){showAdminPanel();return;}
+  document.getElementById('admin-gate').style.display='block';
+  setTimeout(()=>{const pw=document.getElementById('admin-pw');if(pw)pw.focus();},100);
+}
+function hideAdminGate(){
+  document.getElementById('admin-gate').style.display='none';
+  document.getElementById('public-notices').style.display='block';
+}
+function checkAdmin(){
+  const pw=document.getElementById('admin-pw').value;
+  if(pw===ADMIN_PASS){
+    adminLoggedIn=true;
+    document.getElementById('admin-gate').style.display='none';
+    showAdminPanel();
+  } else {
+    document.getElementById('admin-pw-err').style.display='block';
+    document.getElementById('admin-pw').value='';
+  }
+}
+function showAdminPanel(){
+  document.getElementById('admin-panel').style.display='block';
+  renderAdminNotices();
+}
+function logoutAdmin(){
+  adminLoggedIn=false;
+  document.getElementById('admin-panel').style.display='none';
+  document.getElementById('public-notices').style.display='block';
+}
+function addNotice(){
+  const tag=document.getElementById('adm-tag').value;
+  const title=document.getElementById('adm-title').value.trim();
+  const body=document.getElementById('adm-body').value.trim();
+  const errEl=document.getElementById('adm-err');
+  if(!title||!body){errEl.style.display='block';return;}
+  errEl.style.display='none';
+  const now=new Date();
+  const date='Posted '+now.toLocaleDateString('en-GB',{day:'numeric',month:'short',year:'numeric'});
+  NOTICES.unshift({tag,title,body,date});
+  document.getElementById('adm-title').value='';
+  document.getElementById('adm-body').value='';
+  renderNotices();
+  renderAdminNotices();
+}
+function deleteNotice(idx){
+  NOTICES.splice(idx,1);
+  renderNotices();
+  renderAdminNotices();
+}
+
 // ── AL-ASMA UL-HUSNA ─────────────────────────────────────────────────────────
 const ASMA = [
   {ar:'ٱللَّٰه',        tr:'Allah',          en:'The One God'},
@@ -1240,7 +1361,7 @@ const ASMA = [
   {ar:'ٱلْحَيّ',        tr:'Al-Hayy',        en:'The Ever-Living'},
   {ar:'ٱلْقَيُّوم',     tr:'Al-Qayyum',      en:'The Self-Subsisting'},
   {ar:'ٱلْوَاجِد',      tr:'Al-Wajid',       en:'The Finder'},
-  {ar:'ٱلْمَاجِد',      tr:'Al-Majid',       en:'The Illustrious'},
+  {ar:'ٱلْمَاجِد',      tr:'Al-Maajid',      en:'The Illustrious'},
   {ar:'ٱلْوَاحِد',      tr:'Al-Wahid',       en:'The One'},
   {ar:'ٱلْأَحَد',       tr:'Al-Ahad',        en:'The Unique'},
   {ar:'ٱلصَّمَد',       tr:'As-Samad',       en:'The Eternal'},
@@ -1252,7 +1373,7 @@ const ASMA = [
   {ar:'ٱلْآخِر',        tr:'Al-Akhir',       en:'The Last'},
   {ar:'ٱلظَّاهِر',      tr:'Az-Zahir',       en:'The Manifest'},
   {ar:'ٱلْبَاطِن',      tr:'Al-Batin',       en:'The Hidden'},
-  {ar:'ٱلْوَالِي',      tr:'Al-Wali',        en:'The Governor'},
+  {ar:'ٱلْوَالِي',      tr:'Al-Waali',       en:'The Governor'},
   {ar:'ٱلْمُتَعَالِي',  tr:'Al-Mutaali',     en:'The Most Exalted'},
   {ar:'ٱلْبَر',         tr:'Al-Barr',        en:'The Source of Goodness'},
   {ar:'ٱلتَّوَّاب',     tr:'At-Tawwab',      en:'The Ever-Pardoning'},
@@ -1294,10 +1415,24 @@ function showAsma(idx){
     mn.textContent = a.en;
     ar.style.opacity='1';tr.style.opacity='1';mn.style.opacity='1';
   },400);
-  // Update dots (show 7 around current)
+  // Show 9 dots around current position (not all 99)
   const dots = document.getElementById('asma-dots');
   if(dots){
-    dots.innerHTML = ASMA.map((_,i)=>`<span class="asma-dot ${i===idx?'on':''}" onclick="jumpAsma(${i})"></span>`).join('');
+    const total=ASMA.length;
+    const half=4;
+    let start=Math.max(0,idx-half);
+    let end=Math.min(total-1,idx+half);
+    if(end-start<8){
+      if(start===0)end=Math.min(8,total-1);
+      else start=Math.max(0,end-8);
+    }
+    let dotsHtml='';
+    if(start>0)dotsHtml+='<span style="font-size:8px;color:var(--txt3);margin:0 2px">…</span>';
+    for(let i=start;i<=end;i++){
+      dotsHtml+=`<span class="asma-dot ${i===idx?'on':''}" onclick="jumpAsma(${i})" title="${ASMA[i].tr}"></span>`;
+    }
+    if(end<total-1)dotsHtml+='<span style="font-size:8px;color:var(--txt3);margin:0 2px">…</span>';
+    dots.innerHTML=dotsHtml;
   }
 }
 
