@@ -298,6 +298,14 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
 .admin-form{background:var(--s1);border:0.5px solid var(--bdr2);border-radius:14px;padding:1.25rem;margin-bottom:1rem}
 .admin-logout{font-size:11px;color:var(--txt3);cursor:pointer;border:none;background:none;font-family:'Outfit',sans-serif;float:right;margin-bottom:8px}
 .admin-logout:hover{color:var(--red)}
+.adm-tab{padding:7px 14px;border-radius:20px;border:0.5px solid var(--bdr);background:transparent;color:var(--txt2);font-family:'Outfit',sans-serif;font-size:12px;cursor:pointer;transition:all 0.2s}
+.adm-tab.on{background:var(--gold);color:#0a0f1a;border-color:var(--gold);font-weight:500}
+.adm-tab:hover:not(.on){border-color:var(--bdr2);color:var(--txt)}
+.dir-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--bdr)}
+.dir-row:last-child{border-bottom:none}
+.dir-id{font-family:'Amiri',serif;font-size:16px;color:var(--gold);min-width:70px;font-weight:700}
+.dir-name{font-size:13px;color:var(--txt);flex:1}
+.dir-count{font-size:11px;color:var(--txt3)}
 /* SCROLLBAR */
 ::-webkit-scrollbar{width:4px}
 ::-webkit-scrollbar-track{background:transparent}
@@ -485,7 +493,9 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
       <div class="suc-wrap">
         <div class="suc-circle">&#10003;</div>
         <div class="suc-h">Jazakallah Khair!</div>
-        <div class="suc-p" id="ci-suc-name" style="font-size:15px;color:var(--txt);font-weight:500;margin-bottom:6px"></div>
+        <div class="suc-p" id="ci-suc-name" style="font-size:15px;color:var(--txt);font-weight:500;margin-bottom:8px"></div>
+        <div id="ci-suc-id" style="font-family:'Amiri',serif;font-size:28px;color:var(--gold);letter-spacing:2px;margin-bottom:4px"></div>
+        <div style="font-size:11px;color:var(--txt3);margin-bottom:1rem">Your permanent Khadim ID — remember this</div>
         <div class="suc-chips" id="ci-suc-chips" style="margin-bottom:1rem"></div>
         <div id="ci-suc-quote" style="font-size:12px;color:var(--txt2);font-style:italic;max-width:320px;margin:0 auto 1.25rem;line-height:1.7;background:var(--s2);border-left:2px solid var(--gold3);border-radius:0 8px 8px 0;padding:10px 14px;text-align:left"></div>
         <button class="btn-again" onclick="resetCI()">Check in again</button>
@@ -528,7 +538,9 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
       <div class="suc-wrap">
         <div class="suc-circle" style="border-color:var(--green2)">&#10003;</div>
         <div class="suc-h" style="color:var(--green2)">Alhamdulillah!</div>
-        <div class="suc-p" id="hp-suc-text" style="font-size:15px;color:var(--txt);font-weight:500;margin-bottom:6px"></div>
+        <div class="suc-p" id="hp-suc-text" style="font-size:15px;color:var(--txt);font-weight:500;margin-bottom:8px"></div>
+        <div id="hp-suc-id" style="font-family:'Amiri',serif;font-size:28px;color:var(--gold);letter-spacing:2px;margin-bottom:4px"></div>
+        <div style="font-size:11px;color:var(--txt3);margin-bottom:1rem">Your permanent Khadim ID — remember this</div>
         <div class="suc-chips" style="margin-bottom:1rem">
           <span class="chip" style="background:rgba(45,158,107,0.1);color:var(--green2);border:0.5px solid rgba(45,158,107,0.3)" id="hp-chip"></span>
         </div>
@@ -646,32 +658,55 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
     <!-- Admin panel -->
     <div id="admin-panel" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;margin-top:0.5rem">
-        <p class="sec" style="margin-bottom:0;flex:1">Admin panel</p>
+        <p class="sec" style="margin-bottom:0;flex:1">Admin Panel</p>
         <button class="admin-logout" onclick="logoutAdmin()">Logout</button>
       </div>
 
-      <!-- WhatsApp Reminder -->
-      <div style="background:var(--s2);border:0.5px solid rgba(45,158,107,0.3);border-radius:12px;padding:1rem;margin-bottom:1rem">
-        <div style="font-size:12px;color:var(--green2);font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:6px">
-          <span style="font-size:16px">&#128241;</span> WhatsApp Attendance Reminder
-        </div>
-        <div style="font-size:12px;color:var(--txt2);margin-bottom:10px">Send a reminder to the group to update their attendance</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <a id="wa-reminder-link" href="#" target="_blank" style="flex:1;min-width:140px;display:block;padding:10px;background:rgba(45,158,107,0.15);border:0.5px solid rgba(45,158,107,0.4);color:var(--green2);border-radius:8px;text-align:center;text-decoration:none;font-size:13px;font-family:'Outfit',sans-serif">
-            &#128172; Send Today's Reminder
-          </a>
-          <a id="wa-weekly-link" href="#" target="_blank" style="flex:1;min-width:140px;display:block;padding:10px;background:rgba(201,168,76,0.1);border:0.5px solid var(--gold3);color:var(--gold);border-radius:8px;text-align:center;text-decoration:none;font-size:13px;font-family:'Outfit',sans-serif">
-            &#128202; Send Weekly Summary
-          </a>
-        </div>
-        <div style="font-size:11px;color:var(--txt3);margin-top:8px">Opens WhatsApp with a pre-filled message — you pick the contact or group</div>
+      <!-- Admin section tabs -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:1rem">
+        <button class="adm-tab on" onclick="showAdmTab('att',this)">Today's Attendance</button>
+        <button class="adm-tab" onclick="showAdmTab('dir',this)">Khadim Directory</button>
+        <button class="adm-tab" onclick="showAdmTab('wa',this)">WhatsApp</button>
+        <button class="adm-tab" onclick="showAdmTab('notices',this)">Notices</button>
       </div>
 
-      <!-- Full attendance view (admin only) -->
-      <div style="background:var(--s2);border:0.5px solid var(--bdr);border-radius:12px;padding:1rem;margin-bottom:1rem">
-        <div style="font-size:12px;color:var(--gold);font-weight:500;margin-bottom:10px">&#128100; Today's full attendance (names)</div>
-        <div id="admin-att-list" style="max-height:300px;overflow-y:auto"></div>
+      <!-- Attendance Tab -->
+      <div id="adm-tab-att">
+        <div style="background:var(--s2);border:0.5px solid var(--bdr);border-radius:12px;padding:1rem;margin-bottom:1rem">
+          <div style="font-size:12px;color:var(--gold);font-weight:500;margin-bottom:4px">Today's full attendance — real names</div>
+          <div style="font-size:11px;color:var(--txt3);margin-bottom:10px">Only visible to admin. Public sees KH-IDs only.</div>
+          <div id="admin-att-list" style="max-height:340px;overflow-y:auto"></div>
+        </div>
       </div>
+
+      <!-- Directory Tab -->
+      <div id="adm-tab-dir" style="display:none">
+        <div style="background:var(--s2);border:0.5px solid var(--bdr);border-radius:12px;padding:1rem;margin-bottom:1rem">
+          <div style="font-size:12px;color:var(--gold);font-weight:500;margin-bottom:4px">Khadim ID Directory</div>
+          <div style="font-size:11px;color:var(--txt3);margin-bottom:10px">Every person who has ever checked in, with their assigned anonymous ID.</div>
+          <div id="admin-dir-list" style="max-height:400px;overflow-y:auto"></div>
+        </div>
+      </div>
+
+      <!-- WhatsApp Tab -->
+      <div id="adm-tab-wa" style="display:none">
+        <div style="background:var(--s2);border:0.5px solid rgba(45,158,107,0.3);border-radius:12px;padding:1rem;margin-bottom:1rem">
+          <div style="font-size:12px;color:var(--green2);font-weight:500;margin-bottom:6px">WhatsApp Attendance Reminder</div>
+          <div style="font-size:12px;color:var(--txt2);margin-bottom:10px">Send a reminder to the group to update their attendance</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <a id="wa-reminder-link" href="#" target="_blank" style="flex:1;min-width:140px;display:block;padding:10px;background:rgba(45,158,107,0.15);border:0.5px solid rgba(45,158,107,0.4);color:var(--green2);border-radius:8px;text-align:center;text-decoration:none;font-size:13px;font-family:'Outfit',sans-serif">
+              Send Today's Reminder
+            </a>
+            <a id="wa-weekly-link" href="#" target="_blank" style="flex:1;min-width:140px;display:block;padding:10px;background:rgba(201,168,76,0.1);border:0.5px solid var(--gold3);color:var(--gold);border-radius:8px;text-align:center;text-decoration:none;font-size:13px;font-family:'Outfit',sans-serif">
+              Send Weekly Summary
+            </a>
+          </div>
+          <div style="font-size:11px;color:var(--txt3);margin-top:8px">Opens WhatsApp — you pick the group to send to</div>
+        </div>
+      </div>
+
+      <!-- Notices Tab -->
+      <div id="adm-tab-notices" style="display:none">
       <div class="admin-form">
         <div style="font-size:13px;font-weight:500;margin-bottom:12px;color:var(--txt)">Add new announcement</div>
         <div class="field">
@@ -695,7 +730,9 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
       </div>
       <p class="sec">Posted notices</p>
       <div id="admin-notices-list"></div>
-    </div>
+      </div><!-- end adm-tab-notices -->
+
+    </div><!-- end admin-panel -->
 
   </div>
 </div>
@@ -1121,6 +1158,8 @@ function submitFull(skipQuran){
   document.getElementById('ci-step2').style.display='none';
   document.getElementById('ci-step3').style.display='block';
   document.getElementById('ci-suc-name').textContent=ciName;
+  const sucId=document.getElementById('ci-suc-id');
+  if(sucId)sucId.textContent=getKhadimId(ciName);
   const chips=document.getElementById('ci-suc-chips');
   const salahChips=(lastEntry&&lastEntry.salahs?lastEntry.salahs:[ciSalah]).map(s=>`<span class="chip chip-prayer">${s}</span>`).join(' ');
   chips.innerHTML=salahChips+`<span class="chip loc-mosque" style="margin-left:6px">Mosque</span>`;
@@ -1400,7 +1439,61 @@ function showAdminPanel(){
   document.getElementById('admin-panel').style.display='block';
   renderAdminNotices();
   renderAdminAttendance();
+  renderAdminDirectory();
   buildWhatsAppLinks();
+}
+
+function showAdmTab(tab,el){
+  ['att','dir','wa','notices'].forEach(t=>{
+    const el2=document.getElementById('adm-tab-'+t);
+    if(el2)el2.style.display=t===tab?'block':'none';
+  });
+  document.querySelectorAll('.adm-tab').forEach(b=>b.classList.remove('on'));
+  el.classList.add('on');
+  // Refresh data for that tab
+  if(tab==='att')renderAdminAttendance();
+  if(tab==='dir')renderAdminDirectory();
+  if(tab==='wa')buildWhatsAppLinks();
+}
+
+function renderAdminDirectory(){
+  const el=document.getElementById('admin-dir-list');
+  if(!el)return;
+  rebuildIdRegistry();
+  // Build list of all khudam with their session counts
+  const counts={};
+  const allSalahNames=[...SALAHS.map(s=>s.name),'Jumuah'];
+  Object.values(HISTORY).forEach(dayData=>{
+    allSalahNames.forEach(s=>{
+      (dayData[s]||[]).forEach(p=>{
+        const key=p.name.toLowerCase();
+        if(!counts[key])counts[key]={name:p.name,total:0};
+        counts[key].total++;
+      });
+    });
+  });
+  // Sort by ID number
+  const entries=Object.entries(ID_REGISTRY)
+    .map(([key,id])=>({
+      id,
+      name:counts[key]?counts[key].name:key,
+      total:counts[key]?counts[key].total:0
+    }))
+    .sort((a,b)=>{
+      const na=parseInt(a.id.split('-')[1]);
+      const nb=parseInt(b.id.split('-')[1]);
+      return na-nb;
+    });
+  if(!entries.length){
+    el.innerHTML='<div style="text-align:center;color:var(--txt3);font-size:12px;padding:1rem">No khudam registered yet</div>';
+    return;
+  }
+  el.innerHTML=entries.map(e=>`
+    <div class="dir-row">
+      <div class="dir-id">${e.id}</div>
+      <div class="dir-name">${e.name}</div>
+      <div class="dir-count">${e.total} prayers</div>
+    </div>`).join('');
 }
 
 function buildWhatsAppLinks(){
@@ -1733,6 +1826,8 @@ function submitHP(){
   hpSalah=hpSalahs[hpSalahs.length-1];
   // Show confirmation
   document.getElementById('hp-suc-text').textContent=name;
+  const hpSucId=document.getElementById('hp-suc-id');
+  if(hpSucId)hpSucId.textContent=getKhadimId(name);
   const salahChips=hpSalahs.map(s=>'<span class="chip" style="background:rgba(45,158,107,0.1);color:var(--green2);border:0.5px solid rgba(45,158,107,0.3)">'+s+'</span>').join(' ');
   document.getElementById('hp-chip').outerHTML='<div id="hp-chip" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">'+salahChips+'</div>';
   document.getElementById('hp-step1').style.display='none';
