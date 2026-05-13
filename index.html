@@ -822,6 +822,40 @@ function attGet(salah){return getTodayATT()[salah]||[];}
 function attFind(salah,name){return attGet(salah).find(p=>p.name.toLowerCase()===name.toLowerCase());}
 function attFindInDay(salah,name,day){return(day[salah]||[]).find(p=>p.name.toLowerCase()===name.toLowerCase());}
 function attPush(salah,entry){getTodayATT()[salah].push(entry);}
+
+// ── ANONYMOUS ID SYSTEM ────────────────────────────────────────────────────────
+// Generates a consistent KH-XXX code from a name — same name always same ID
+// Nobody can reverse it without knowing the original name
+const ID_REGISTRY = {}; // name.toLowerCase() → KH-XXX
+function getKhadimId(name){
+  const key=name.toLowerCase().trim();
+  if(ID_REGISTRY[key])return ID_REGISTRY[key];
+  // Build from all known names in HISTORY (sorted for consistency)
+  rebuildIdRegistry();
+  if(ID_REGISTRY[key])return ID_REGISTRY[key];
+  // New name — assign next available number
+  const nextNum=Object.keys(ID_REGISTRY).length+1;
+  const id='KH-'+String(nextNum).padStart(3,'0');
+  ID_REGISTRY[key]=id;
+  return id;
+}
+function rebuildIdRegistry(){
+  // Collect all unique names from history in first-seen order
+  const seen=[];
+  Object.keys(HISTORY).sort().forEach(dateKey=>{
+    const dayData=HISTORY[dateKey];
+    const allSalahNames=[...SALAHS.map(s=>s.name),'Jumuah'];
+    allSalahNames.forEach(s=>{
+      (dayData[s]||[]).forEach(p=>{
+        const key=p.name.toLowerCase().trim();
+        if(!seen.includes(key))seen.push(key);
+      });
+    });
+  });
+  seen.forEach((key,i)=>{
+    if(!ID_REGISTRY[key])ID_REGISTRY[key]='KH-'+String(i+1).padStart(3,'0');
+  });
+}
 let todaySelected = null;
 let quranRead = null;
 let qrReady = false;
@@ -946,9 +980,9 @@ function renderAttList(salahName,containerId,dayData){
   if(!ppl.length){el.innerHTML=`<div class="empty-state">No attendees yet for ${salahName}</div>`;return;}
   el.innerHTML=ppl.map((p,idx)=>`
     <div class="att-row">
-      <div class="av">${initials(p.name)}</div>
+      <div class="av" style="font-size:9px">${getKhadimId(p.name).split('-')[1]}</div>
       <div class="att-info">
-        <div class="att-name">${p.name} <span class="loc-badge ${p.location==='home'?'loc-home':'loc-mosque'}">${p.location==='home'?'Home':'Mosque'}</span></div>
+        <div class="att-name">${getKhadimId(p.name)} <span class="loc-badge ${p.location==='home'?'loc-home':'loc-mosque'}">${p.location==='home'?'Home':'Mosque'}</span></div>
         <div class="att-meta">${p.role}${p.quran?' · '+p.quran:''}</div>
       </div>
       ${isToday?`<button onclick="removeEntry('${salahName}',${idx})" style="background:none;border:0.5px solid rgba(226,75,74,0.35);color:var(--red);border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif;flex-shrink:0" title="Remove entry">x</button>`:''}
@@ -1278,36 +1312,33 @@ function renderLiveNamesTable(){
 function renderLeaderboard(){
   const el=document.getElementById('leaderboard');
   if(!el)return;
+  rebuildIdRegistry();
   const all={};
+  const allSalahNames=[...SALAHS.map(s=>s.name),'Jumuah'];
   Object.values(HISTORY).forEach(dayData=>{
-    SALAHS.forEach(s=>{
-      (dayData[s.name]||[]).forEach(p=>{
+    allSalahNames.forEach(s=>{
+      (dayData[s]||[]).forEach(p=>{
         const key=p.name.toLowerCase();
-        if(!all[key])all[key]={name:p.name,sessions:0,mosque:0,home:0,quran:''};
+        if(!all[key])all[key]={name:p.name,sessions:0,mosque:0,home:0};
         all[key].sessions++;
         if(p.location==='home')all[key].home++;else all[key].mosque++;
-        if(p.quran)all[key].quran=p.quran;
       });
     });
   });
-  const top=Object.values(all).sort((a,b)=>b.sessions-a.sessions).slice(0,8);
-  el.innerHTML=top.length?top.map((p,i)=>`
-    <div class="rank-row">
-      <div class="rank-num ${i<3?'top':''}">${i===0?'★':i+1}</div>
-      <div class="av" style="width:30px;height:30px;font-size:10px">${initials(p.name)}</div>
-      <div class="rank-info">
-        <div class="rank-name">${p.name}</div>
-        <div class="rank-meta">${p.sessions} prayers · ${p.mosque} mosque · ${p.home} home${p.quran?' · Quran: '+p.quran:''}</div>
-      </div>
-      <div class="rank-streak" style="font-size:11px;text-align:right">${p.sessions}<br><span style="font-size:9px;color:var(--txt3)">total</span></div>
-    </div>`).join(''):'<div class="empty-state">No data yet — be the first to check in!</div>';
+  const top=Object.values(all).sort((a,b)=>b.sessions-a.sessions).slice(0,10);
+  el.innerHTML=top.length?top.map((p,i)=>{
+    const kid=getKhadimId(p.name);
+    return '<div class="rank-row">'
+      +'<div class="rank-num '+(i<3?'top':'')+'">'+( i===0?'★':i+1)+'</div>'
+      +'<div class="av" style="width:32px;height:32px;font-size:10px">'+kid.split('-')[1]+'</div>'
+      +'<div class="rank-info">'
+        +'<div class="rank-name">'+kid+'</div>'
+        +'<div class="rank-meta">'+p.sessions+' prayers · '+p.mosque+' mosque · '+p.home+' home</div>'
+      +'</div>'
+      +'<div class="rank-streak" style="font-size:13px;font-weight:500;color:var(--gold)">'+p.sessions+'</div>'
+      +'</div>';
+  }).join(''):'<div class="empty-state">No data yet</div>';
 }
-
-// ── NOTICE BOARD ──────────────────────────────────────────────────────────────
-let NOTICES = [];
-const ADMIN_PASS = 'admin123';
-let adminLoggedIn = false;
-
 function renderNotices(){
   const el=document.getElementById('notices-list');
   if(!el)return;
@@ -1429,7 +1460,7 @@ function renderAdminAttendance(){
   el.innerHTML=rows.map(r=>`
     <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--bdr)">
       <div style="width:28px;height:28px;border-radius:50%;background:var(--s1);border:1px solid var(--gold3);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--gold);flex-shrink:0">${initials(r.name)}</div>
-      <div style="flex:1;font-size:13px">${r.name}</div>
+      <div style="flex:1;font-size:13px">${r.name} <span style="font-size:10px;color:var(--gold3)">${getKhadimId(r.name)}</span></div>
       <span style="font-size:10px;padding:1px 7px;border-radius:8px;background:rgba(201,168,76,0.1);color:var(--gold)">${r.salah}</span>
       <span class="loc-badge ${r.location==='home'?'loc-home':'loc-mosque'}">${r.location==='home'?'Home':'Mosque'}</span>
       ${r.quran?`<span style="font-size:10px;color:var(--green2)">&#9654;</span>`:''}
