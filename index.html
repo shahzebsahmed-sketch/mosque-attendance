@@ -439,15 +439,15 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
         <div style="font-size:13px;color:var(--txt2)">Select your prayer and enter your name</div>
       </div>
       <div style="margin-bottom:1.25rem">
-        <div style="font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;text-align:center">Which prayer did you attend?</div>
+        <div style="font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;text-align:center">Which prayer(s) did you attend? <span style="color:var(--gold3)">(select all that apply)</span></div>
         <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px" id="ci-prayer-grid">
-          <button class="prayer-sel-btn" onclick="setCIPrayer('Fajr',this)">Fajr</button>
-          <button class="prayer-sel-btn" onclick="setCIPrayer('Zuhr',this)">Zuhr</button>
-          <button class="prayer-sel-btn" onclick="setCIPrayer('Asr',this)">Asr</button>
-          <button class="prayer-sel-btn" onclick="setCIPrayer('Maghrib',this)">Maghrib</button>
-          <button class="prayer-sel-btn" onclick="setCIPrayer('Isha',this)">Isha</button>
+          <button class="prayer-sel-btn" onclick="toggleCIPrayer('Fajr',this)">Fajr</button>
+          <button class="prayer-sel-btn" onclick="toggleCIPrayer('Zuhr',this)">Zuhr</button>
+          <button class="prayer-sel-btn" onclick="toggleCIPrayer('Asr',this)">Asr</button>
+          <button class="prayer-sel-btn" onclick="toggleCIPrayer('Maghrib',this)">Maghrib</button>
+          <button class="prayer-sel-btn" onclick="toggleCIPrayer('Isha',this)">Isha</button>
         </div>
-        <div id="ci-prayer-err" style="font-size:12px;color:var(--red);text-align:center;margin-top:6px;display:none">Please select a prayer</div>
+        <div id="ci-prayer-err" style="font-size:12px;color:var(--red);text-align:center;margin-top:6px;display:none">Please select at least one prayer</div>
       </div>
       <div class="name-big">
         <input type="text" id="ci-name" placeholder="Your name" autocomplete="name" autocorrect="off" autocapitalize="words" spellcheck="false" onkeydown="if(event.key==='Enter')confirmName()">
@@ -583,42 +583,28 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
     <div class="stat-card"><div class="stat-num" id="st-quran">0</div><div class="stat-lbl">Read Quran today</div></div>
   </div>
 
-  <p class="sec">Today's attendance by name</p>
-  <div style="background:var(--s1);border:0.5px solid var(--bdr);border-radius:13px;overflow:hidden;margin-bottom:1.25rem">
-    <table class="stats-table" id="live-names-table">
-      <thead><tr>
-        <th>Name</th>
-        <th>Prayer</th>
-        <th style="text-align:right">Type / Quran</th>
-      </tr></thead>
-      <tbody id="live-names-body">
-        <tr><td colspan="3" style="text-align:center;color:var(--txt3);padding:1.5rem;font-size:13px">No check-ins yet today</td></tr>
-      </tbody>
-    </table>
-  </div>
+  <p class="sec">Today's prayer breakdown</p>
+  <div class="salah-grid" id="stats-salah-grid" style="margin-bottom:1.25rem"></div>
 
   <p class="sec">Weekly attendance (last 7 days)</p>
   <div class="chart-wrap" style="margin-bottom:1.25rem">
     <div class="chart-bars" id="weekly-bars"></div>
   </div>
 
-  <p class="sec">All attendance history</p>
-  <div style="background:var(--s1);border:0.5px solid var(--bdr);border-radius:13px;overflow:hidden;margin-bottom:1.25rem">
-    <table class="stats-table" id="history-names-table">
-      <thead><tr>
-        <th>Name</th>
-        <th>Date</th>
-        <th>Prayer</th>
-        <th style="text-align:right">Type / Quran</th>
-      </tr></thead>
-      <tbody id="history-names-body">
-        <tr><td colspan="4" style="text-align:center;color:var(--txt3);padding:1rem;font-size:13px">No past records</td></tr>
-      </tbody>
-    </table>
+  <p class="sec">All-time totals</p>
+  <div class="stats-grid" style="margin-bottom:1.25rem">
+    <div class="stat-card"><div class="stat-num" id="st-alltime">0</div><div class="stat-lbl">All-time check-ins</div></div>
+    <div class="stat-card"><div class="stat-num" id="st-mosque-total">0</div><div class="stat-lbl">At mosque</div></div>
+    <div class="stat-card"><div class="stat-num" id="st-home-total">0</div><div class="stat-lbl">At home</div></div>
+    <div class="stat-card"><div class="stat-num" id="st-quran-total">0</div><div class="stat-lbl">Read Quran (all time)</div></div>
   </div>
 
-  <p class="sec">All-time leaderboard</p>
+  <p class="sec">Leaderboard (top attendees)</p>
   <div id="leaderboard"><div class="empty-state">No data yet — be the first to check in!</div></div>
+
+  <!-- Hidden name tables — rendered but not shown publicly -->
+  <table id="live-names-table" style="display:none"><tbody id="live-names-body"></tbody></table>
+  <table id="history-names-table" style="display:none"><tbody id="history-names-body"></tbody></table>
 </div>
 
 <!-- ===== NOTICE BOARD ===== -->
@@ -657,8 +643,31 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
     <!-- Admin panel -->
     <div id="admin-panel" style="display:none">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem;margin-top:0.5rem">
-        <p class="sec" style="margin-bottom:0;flex:1">Manage notices</p>
+        <p class="sec" style="margin-bottom:0;flex:1">Admin panel</p>
         <button class="admin-logout" onclick="logoutAdmin()">Logout</button>
+      </div>
+
+      <!-- WhatsApp Reminder -->
+      <div style="background:var(--s2);border:0.5px solid rgba(45,158,107,0.3);border-radius:12px;padding:1rem;margin-bottom:1rem">
+        <div style="font-size:12px;color:var(--green2);font-weight:500;margin-bottom:6px;display:flex;align-items:center;gap:6px">
+          <span style="font-size:16px">&#128241;</span> WhatsApp Attendance Reminder
+        </div>
+        <div style="font-size:12px;color:var(--txt2);margin-bottom:10px">Send a reminder to the group to update their attendance</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <a id="wa-reminder-link" href="#" target="_blank" style="flex:1;min-width:140px;display:block;padding:10px;background:rgba(45,158,107,0.15);border:0.5px solid rgba(45,158,107,0.4);color:var(--green2);border-radius:8px;text-align:center;text-decoration:none;font-size:13px;font-family:'Outfit',sans-serif">
+            &#128172; Send Today's Reminder
+          </a>
+          <a id="wa-weekly-link" href="#" target="_blank" style="flex:1;min-width:140px;display:block;padding:10px;background:rgba(201,168,76,0.1);border:0.5px solid var(--gold3);color:var(--gold);border-radius:8px;text-align:center;text-decoration:none;font-size:13px;font-family:'Outfit',sans-serif">
+            &#128202; Send Weekly Summary
+          </a>
+        </div>
+        <div style="font-size:11px;color:var(--txt3);margin-top:8px">Opens WhatsApp with a pre-filled message — you pick the contact or group</div>
+      </div>
+
+      <!-- Full attendance view (admin only) -->
+      <div style="background:var(--s2);border:0.5px solid var(--bdr);border-radius:12px;padding:1rem;margin-bottom:1rem">
+        <div style="font-size:12px;color:var(--gold);font-weight:500;margin-bottom:10px">&#128100; Today's full attendance (names)</div>
+        <div id="admin-att-list" style="max-height:300px;overflow-y:auto"></div>
       </div>
       <div class="admin-form">
         <div style="font-size:13px;font-weight:500;margin-bottom:12px;color:var(--txt)">Add new announcement</div>
@@ -936,7 +945,7 @@ function renderAttList(salahName,containerId,dayData){
         <div class="att-name">${p.name} <span class="loc-badge ${p.location==='home'?'loc-home':'loc-mosque'}">${p.location==='home'?'Home':'Mosque'}</span></div>
         <div class="att-meta">${p.role}${p.quran?' · '+p.quran:''}</div>
       </div>
-      ${isToday?`<button onclick="removeEntry('${salahName}',${idx})" style="background:none;border:0.5px solid rgba(226,75,74,0.35);color:var(--red);border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif;flex-shrink:0" title="Remove entry">✕</button>`:''}
+      ${isToday?`<button onclick="removeEntry('${salahName}',${idx})" style="background:none;border:0.5px solid rgba(226,75,74,0.35);color:var(--red);border-radius:6px;padding:3px 9px;font-size:11px;cursor:pointer;font-family:'Outfit',sans-serif;flex-shrink:0" title="Remove entry">x</button>`:''}
     </div>`).join('');
 }
 
@@ -1002,32 +1011,43 @@ function showPrayerChange(){
   el.style.flexWrap='wrap';el.style.gap='6px';el.style.justifyContent='center';
 }
 
-function setCIPrayer(name,el){
-  ciSalah=name;
-  document.getElementById('ci-salah-name').textContent=name;
-  const cur=SALAHS.find(s=>s.name===name);
+// Multi-select: ciSalahs is array of selected prayers
+let ciSalahs = [];
 
-  document.querySelectorAll('#prayer-change .qbtn').forEach(b=>b.classList.remove('on'));
-  el.classList.add('on');
+function toggleCIPrayer(name,el){
+  const idx=ciSalahs.indexOf(name);
+  if(idx>=0){ciSalahs.splice(idx,1);el.classList.remove('on');}
+  else{ciSalahs.push(name);el.classList.add('on');}
+  ciSalah=ciSalahs.length?ciSalahs[ciSalahs.length-1]:null;
+  document.getElementById('ci-prayer-err').style.display='none';
+}
+
+function setCIPrayer(name,el){
+  // Used for auto-select on tab open — toggle it on
+  if(!ciSalahs.includes(name)){toggleCIPrayer(name,el);}
 }
 
 function confirmName(){
   const name=document.getElementById('ci-name').value.trim();
   const errEl=document.getElementById('ci-name-err');
   const pErr=document.getElementById('ci-prayer-err');
-  if(!ciSalah){pErr.style.display='block';return;}
+  if(!ciSalahs.length){pErr.style.display='block';return;}
   pErr.style.display='none';
   if(!name){errEl.style.display='block';return;}
   errEl.style.display='none';
   ciName=name;
-  // Save attendance immediately — name is enough
-  if(!attFind(ciSalah,name)){
-    const moEntry={name,role:'Khadim',streak:1,quran:'',location:'mosque'};
-    lastEntry={salah:ciSalah,name,dateKey:todayKey(),location:'mosque',entry:moEntry};
-    attPushWithSync(ciSalah,moEntry).then(()=>{
-      // db_id now set on moEntry if Supabase succeeded
-    });
-  }
+  // Save all selected prayers
+  const savedSalahs=[];
+  ciSalahs.forEach(sal=>{
+    if(!attFind(sal,name)){
+      const moEntry={name,role:'Khadim',streak:1,quran:'',location:'mosque'};
+      attPushWithSync(sal,moEntry);
+      savedSalahs.push({sal,entry:moEntry});
+    }
+  });
+  // lastEntry tracks all for undo
+  lastEntry={salahs:ciSalahs.slice(),name,dateKey:todayKey(),location:'mosque'};
+  ciSalah=ciSalahs[ciSalahs.length-1]; // for step 2/3 display
   renderAllGrids();renderStats();renderLeaderboard();
   // Move to step 2 (quran optional)
   document.getElementById('ci-step1').style.display='none';
@@ -1062,7 +1082,8 @@ function submitFull(skipQuran){
   document.getElementById('ci-step3').style.display='block';
   document.getElementById('ci-suc-name').textContent=ciName;
   const chips=document.getElementById('ci-suc-chips');
-  chips.innerHTML=`<span class="chip chip-prayer">${ciSalah}</span><span class="chip loc-mosque" style="margin-left:4px">Mosque</span>`;
+  const salahChips=(lastEntry&&lastEntry.salahs?lastEntry.salahs:[ciSalah]).map(s=>`<span class="chip chip-prayer">${s}</span>`).join(' ');
+  chips.innerHTML=salahChips+`<span class="chip loc-mosque" style="margin-left:6px">Mosque</span>`;
   const entry=attFind(ciSalah,ciName);
   if(entry&&entry.quran)chips.innerHTML+=`<span class="chip chip-quran" style="margin-top:6px">&#9654; Quran: ${entry.quran}</span>`;
   // Show a random quote
@@ -1087,7 +1108,7 @@ function resetCI(){
   document.getElementById('qq-pages').style.display='none';
   document.querySelectorAll('#ci-prayer-grid .prayer-sel-btn').forEach(b=>b.classList.remove('on'));
   document.querySelectorAll('.qbtn').forEach(b=>b.classList.remove('on'));
-  qqRead=null;ciName='';ciSalah=null;
+  qqRead=null;ciName='';ciSalah=null;ciSalahs=[];
   document.getElementById('ci-step1').style.display='block';
   document.getElementById('ci-step2').style.display='none';
   document.getElementById('ci-step3').style.display='none';
@@ -1111,6 +1132,46 @@ function renderStats(){
   document.getElementById('st-avg').textContent=avg;
   document.getElementById('st-top').textContent=total>0?SALAHS[maxIdx].name:'—';
   document.getElementById('st-quran').textContent=quranToday;
+
+  // Today's prayer breakdown cards (numbers only)
+  const sg=document.getElementById('stats-salah-grid');
+  if(sg){
+    const mx=Math.max(1,...SALAHS.map(s=>(today[s.name]||[]).length));
+    sg.innerHTML=SALAHS.map(s=>{
+      const arr=today[s.name]||[];
+      const cnt=arr.length;
+      const mCnt=arr.filter(p=>p.location!=='home').length;
+      const hCnt=arr.filter(p=>p.location==='home').length;
+      const pct=Math.round(cnt/mx*100);
+      return `<div class="salah-card" style="cursor:default">
+        <div class="sc-day">${new Date().toLocaleDateString('en-GB',{weekday:'long'})}</div>
+        <div class="sc-name">${s.name}</div>
+        <div class="sc-count">${cnt}</div>
+        <div style="display:flex;gap:4px;justify-content:center;margin:3px 0;flex-wrap:wrap">
+          ${mCnt?`<span style="font-size:9px;padding:1px 5px;border-radius:6px;background:rgba(201,168,76,0.1);color:var(--gold3)">${mCnt} mosque</span>`:''}
+          ${hCnt?`<span style="font-size:9px;padding:1px 5px;border-radius:6px;background:rgba(45,158,107,0.08);color:var(--green2)">${hCnt} home</span>`:''}
+        </div>
+        <div class="sc-bar" style="width:${pct}%"></div>
+      </div>`;
+    }).join('');
+  }
+
+  // All-time totals
+  let allTime=0,mosqueTotal=0,homeTotal=0,quranTotal=0;
+  Object.values(HISTORY).forEach(dayData=>{
+    SALAHS.forEach(s=>{
+      (dayData[s.name]||[]).forEach(p=>{
+        allTime++;
+        if(p.location==='home')homeTotal++;else mosqueTotal++;
+        if(p.quran)quranTotal++;
+      });
+    });
+  });
+  const at=document.getElementById('st-alltime');if(at)at.textContent=allTime;
+  const mt=document.getElementById('st-mosque-total');if(mt)mt.textContent=mosqueTotal;
+  const ht=document.getElementById('st-home-total');if(ht)ht.textContent=homeTotal;
+  const qt=document.getElementById('st-quran-total');if(qt)qt.textContent=quranTotal;
+
   renderWeeklyChart();
   renderLiveNamesTable();
 }
@@ -1300,6 +1361,82 @@ function checkAdmin(){
 function showAdminPanel(){
   document.getElementById('admin-panel').style.display='block';
   renderAdminNotices();
+  renderAdminAttendance();
+  buildWhatsAppLinks();
+}
+
+function buildWhatsAppLinks(){
+  const today=getTodayATT();
+  const dayName=new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  const totalToday=SALAHS.reduce((t,s)=>t+(today[s.name]||[]).length,0);
+  const breakdown=SALAHS.map(s=>{
+    const cnt=(today[s.name]||[]).length;
+    return cnt?`${s.name}: ${cnt}`:null;
+  }).filter(Boolean).join(', ');
+
+  // Today reminder
+  const todayMsg=`Assalamu Alaikum brothers [Mosque]
+
+Please remember to mark your attendance on the MKA Crawley South app if you haven't already!
+
+ ${dayName}
+ ${totalToday} check-ins so far
+${breakdown?'('+breakdown+')':''}
+
+>> ${window.location.href}
+
+Jazakallah Khair`;
+  const waLink=document.getElementById('wa-reminder-link');
+  if(waLink)waLink.href='https://wa.me/?text='+encodeURIComponent(todayMsg);
+
+  // Weekly summary
+  let weekTotal=0;
+  const weekLines=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date();d.setDate(d.getDate()-i);
+    const key=d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+    const dayData=HISTORY[key]||{};
+    const cnt=SALAHS.reduce((t,s)=>t+(dayData[s.name]||[]).length,0);
+    if(cnt)weekLines.push(d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+': '+cnt);
+    weekTotal+=cnt;
+  }
+  const weekMsg=`Assalamu Alaikum brothers 
+
+ MKA Crawley South — Weekly Attendance Summary
+
+${weekLines.join('
+')}
+
+Total this week: ${weekTotal} prayers attended
+
+Keep it up! 
+${window.location.href}`;
+  const waWeekly=document.getElementById('wa-weekly-link');
+  if(waWeekly)waWeekly.href='https://wa.me/?text='+encodeURIComponent(weekMsg);
+}
+
+function renderAdminAttendance(){
+  const el=document.getElementById('admin-att-list');
+  if(!el)return;
+  const today=getTodayATT();
+  const rows=[];
+  SALAHS.forEach(s=>{
+    (today[s.name]||[]).forEach(p=>{
+      rows.push({name:p.name,salah:s.name,location:p.location||'mosque',quran:p.quran||''});
+    });
+  });
+  if(!rows.length){
+    el.innerHTML='<div style="text-align:center;color:var(--txt3);font-size:12px;padding:1rem">No check-ins today yet</div>';
+    return;
+  }
+  el.innerHTML=rows.map(r=>`
+    <div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:0.5px solid var(--bdr)">
+      <div style="width:28px;height:28px;border-radius:50%;background:var(--s1);border:1px solid var(--gold3);display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--gold);flex-shrink:0">${initials(r.name)}</div>
+      <div style="flex:1;font-size:13px">${r.name}</div>
+      <span style="font-size:10px;padding:1px 7px;border-radius:8px;background:rgba(201,168,76,0.1);color:var(--gold)">${r.salah}</span>
+      <span class="loc-badge ${r.location==='home'?'loc-home':'loc-mosque'}">${r.location==='home'?'Home':'Mosque'}</span>
+      ${r.quran?`<span style="font-size:10px;color:var(--green2)">&#9654;</span>`:''}
+    </div>`).join('');
 }
 function logoutAdmin(){
   adminLoggedIn=false;
@@ -1594,27 +1731,25 @@ async function undoLastEntry(source){
     else resetHP();
     return;
   }
-  const {salah,name,dateKey,location,entry}=lastEntry;
-  // Remove from local HISTORY
+  const {salahs,salah,name,dateKey,location}=lastEntry;
+  const allSalahs=salahs||[salah];
   const day=getDay(dateKey);
-  if(day[salah]){
-    const idx=day[salah].findIndex(p=>p.name===name&&p.location===location);
-    if(idx>=0)day[salah].splice(idx,1);
-  }
-  // Remove from Supabase — try by db_id first, fall back to name+salah+date
+  // Remove all entries for this person from the selected salahs
+  allSalahs.forEach(s=>{
+    if(day[s]){
+      const idx=day[s].findIndex(p=>p.name===name&&p.location===location);
+      if(idx>=0)day[s].splice(idx,1);
+    }
+  });
+  // Remove from Supabase
   if(sbConnected&&sbClient){
     try{
-      if(entry&&entry.db_id){
-        await sbClient.from('attendance').delete().eq('id',entry.db_id);
-      } else {
-        // Fallback: delete by name + salah + date_key + location
+      for(const s of allSalahs){
         await sbClient.from('attendance').delete()
-          .eq('date_key',dateKey)
-          .eq('salah',salah)
-          .eq('name',name)
-          .eq('location',location);
+          .eq('date_key',dateKey).eq('salah',s)
+          .eq('name',name).eq('location',location);
       }
-      console.log('Removed from Supabase');
+      console.log('Removed',allSalahs.length,'entries from Supabase');
     }catch(e){console.error('Delete error',e.message);}
   }
   lastEntry=null;
@@ -1855,6 +1990,7 @@ window.sv=function(id,el){
     document.getElementById('public-notices').style.display='block';
     document.getElementById('admin-gate').style.display='none';
     if(!adminLoggedIn)document.getElementById('admin-panel').style.display='none';
+    else{renderAdminAttendance();buildWhatsAppLinks();}
   }
   if(id==='past'){
     // Set max date to yesterday
