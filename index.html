@@ -440,12 +440,13 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
       </div>
       <div style="margin-bottom:1.25rem">
         <div style="font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;text-align:center">Which prayer(s) did you attend? <span style="color:var(--gold3)">(select all that apply)</span></div>
-        <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px" id="ci-prayer-grid">
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px" id="ci-prayer-grid">
           <button class="prayer-sel-btn" onclick="toggleCIPrayer('Fajr',this)">Fajr</button>
           <button class="prayer-sel-btn" onclick="toggleCIPrayer('Zuhr',this)">Zuhr</button>
           <button class="prayer-sel-btn" onclick="toggleCIPrayer('Asr',this)">Asr</button>
           <button class="prayer-sel-btn" onclick="toggleCIPrayer('Maghrib',this)">Maghrib</button>
           <button class="prayer-sel-btn" onclick="toggleCIPrayer('Isha',this)">Isha</button>
+          <button class="prayer-sel-btn" id="jumuah-btn-mosque" onclick="toggleCIPrayer('Jumuah',this)" style="border-color:rgba(45,158,107,0.3);color:var(--green2)">Jumuah<br><span style="font-size:9px;opacity:0.7">Friday</span></button>
         </div>
         <div id="ci-prayer-err" style="font-size:12px;color:var(--red);text-align:center;margin-top:6px;display:none">Please select at least one prayer</div>
       </div>
@@ -506,14 +507,16 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
       </div>
       <div style="margin-bottom:1.25rem">
         <div style="font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;text-align:center">Which prayer?</div>
-        <div class="home-prayer-grid">
-          <button class="hp-btn" onclick="setHP('Fajr',this)">Fajr</button>
-          <button class="hp-btn" onclick="setHP('Zuhr',this)">Zuhr</button>
-          <button class="hp-btn" onclick="setHP('Asr',this)">Asr</button>
-          <button class="hp-btn" onclick="setHP('Maghrib',this)">Maghrib</button>
-          <button class="hp-btn" onclick="setHP('Isha',this)">Isha</button>
+        <div style="font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px;text-align:center">Which prayer(s)? <span style="color:var(--gold3)">(select all that apply)</span></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:0.75rem">
+          <button class="hp-btn" onclick="toggleHP('Fajr',this)">Fajr</button>
+          <button class="hp-btn" onclick="toggleHP('Zuhr',this)">Zuhr</button>
+          <button class="hp-btn" onclick="toggleHP('Asr',this)">Asr</button>
+          <button class="hp-btn" onclick="toggleHP('Maghrib',this)">Maghrib</button>
+          <button class="hp-btn" onclick="toggleHP('Isha',this)">Isha</button>
+          <button class="hp-btn" id="jumuah-btn-home" onclick="toggleHP('Jumuah',this)" style="border-color:rgba(45,158,107,0.3);color:var(--green2)">Jumuah<br><span style="font-size:9px;opacity:0.7">Friday</span></button>
         </div>
-        <div id="hp-prayer-err" style="font-size:12px;color:var(--red);text-align:center;margin-top:6px;display:none">Please select a prayer</div>
+        <div id="hp-prayer-err" style="font-size:12px;color:var(--red);text-align:center;margin-top:6px;display:none">Please select at least one prayer</div>
       </div>
       <div class="name-big" style="margin-bottom:12px">
         <input type="text" id="hp-name" placeholder="Your name" autocomplete="name" autocorrect="off" autocapitalize="words" spellcheck="false" onkeydown="if(event.key==='Enter')submitHP()">
@@ -549,7 +552,7 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
         <input type="date" id="past-date" max="">
         <select id="past-salah-sel" style="background:var(--s2);border:0.5px solid var(--bdr);color:var(--txt);border-radius:8px;padding:8px 12px;font-family:'Outfit',sans-serif;font-size:13px;outline:none">
           <option value="">Select prayer</option>
-          <option>Fajr</option><option>Zuhr</option><option>Asr</option><option>Maghrib</option><option>Isha</option>
+          <option>Fajr</option><option>Zuhr</option><option>Asr</option><option>Maghrib</option><option>Isha</option><option>Jumuah</option>
         </select>
       </div>
 
@@ -707,6 +710,8 @@ let SALAHS = [
   {name:'Maghrib', start:[16,30], end:[17,59], label:'4:30 PM'},
   {name:'Isha',    start:[18,0],  end:[23,59], label:'6:00 PM'},
 ];
+// Jumuah is separate — only on Fridays, not part of daily rotation
+const JUMUAH = {name:'Jumuah', start:[12,30], end:[14,0], label:'12:30 PM'};
 
 // Fetch real prayer times from Aladhan API (free, no key)
 // Uses Hastings, UK coordinates
@@ -808,13 +813,14 @@ function todayKey(){
   return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
 }
 function getDay(key){
-  if(!HISTORY[key])HISTORY[key]={Fajr:[],Zuhr:[],Asr:[],Maghrib:[],Isha:[]};
+  if(!HISTORY[key])HISTORY[key]={Fajr:[],Zuhr:[],Asr:[],Maghrib:[],Isha:[],Jumuah:[]};
   return HISTORY[key];
 }
 function getTodayATT(){return getDay(todayKey());}
 // Direct helpers — no Proxy needed
 function attGet(salah){return getTodayATT()[salah]||[];}
 function attFind(salah,name){return attGet(salah).find(p=>p.name.toLowerCase()===name.toLowerCase());}
+function attFindInDay(salah,name,day){return(day[salah]||[]).find(p=>p.name.toLowerCase()===name.toLowerCase());}
 function attPush(salah,entry){getTodayATT()[salah].push(entry);}
 let todaySelected = null;
 let quranRead = null;
@@ -1158,9 +1164,10 @@ function renderStats(){
 
   // All-time totals
   let allTime=0,mosqueTotal=0,homeTotal=0,quranTotal=0;
+  const allPrayerNames=[...SALAHS.map(s=>s.name),'Jumuah'];
   Object.values(HISTORY).forEach(dayData=>{
-    SALAHS.forEach(s=>{
-      (dayData[s.name]||[]).forEach(p=>{
+    allPrayerNames.forEach(sName=>{
+      (dayData[sName]||[]).forEach(p=>{
         allTime++;
         if(p.location==='home')homeTotal++;else mosqueTotal++;
         if(p.quran)quranTotal++;
@@ -1667,29 +1674,36 @@ function renderPastHistory(){
 
 // ── HOME PRAYER ───────────────────────────────────────────────────────────────
 let hpSalah=null;
-function setHP(name,el){
-  hpSalah=name;
-  document.querySelectorAll('.hp-btn').forEach(b=>b.classList.remove('on'));
-  el.classList.add('on');
+let hpSalahs=[]; // multi-select array
+
+function toggleHP(name,el){
+  const idx=hpSalahs.indexOf(name);
+  if(idx>=0){hpSalahs.splice(idx,1);el.classList.remove('on');}
+  else{hpSalahs.push(name);el.classList.add('on');}
+  hpSalah=hpSalahs.length?hpSalahs[hpSalahs.length-1]:null;
   document.getElementById('hp-prayer-err').style.display='none';
 }
+
+function setHP(name,el){toggleHP(name,el);} // backwards compat for auto-select
+
 function submitHP(){
   const name=document.getElementById('hp-name').value.trim();
-  if(!hpSalah){document.getElementById('hp-prayer-err').style.display='block';return;}
+  if(!hpSalahs.length){document.getElementById('hp-prayer-err').style.display='block';return;}
   if(!name){document.getElementById('hp-name-err').style.display='block';return;}
   document.getElementById('hp-name-err').style.display='none';
-  if(!attFind(hpSalah,name)){
-    const hpEntry={name,role:'Khadim',streak:1,quran:'',location:'home'};
-    lastEntry={salah:hpSalah,name,dateKey:todayKey(),location:'home',entry:hpEntry};
-    attPushWithSync(hpSalah,hpEntry).then(()=>{
-      // db_id now set on hpEntry if Supabase succeeded
-    });
-  } else {
-    const entry=attFind(hpSalah,name);
-    if(entry)entry.location='home';
-  }
+  // Save all selected prayers
+  hpSalahs.forEach(sal=>{
+    if(!attFindInDay(sal,name,getTodayATT())){
+      const hpEntry={name,role:'Khadim',streak:1,quran:'',location:'home'};
+      attPushWithSync(sal,hpEntry);
+    }
+  });
+  lastEntry={salahs:hpSalahs.slice(),name,dateKey:todayKey(),location:'home'};
+  hpSalah=hpSalahs[hpSalahs.length-1];
+  // Show confirmation
   document.getElementById('hp-suc-text').textContent=name;
-  document.getElementById('hp-chip').textContent=hpSalah+' — Prayed at home';
+  const salahChips=hpSalahs.map(s=>'<span class="chip" style="background:rgba(45,158,107,0.1);color:var(--green2);border:0.5px solid rgba(45,158,107,0.3)">'+s+'</span>').join(' ');
+  document.getElementById('hp-chip').outerHTML='<div id="hp-chip" style="display:flex;gap:6px;flex-wrap:wrap;justify-content:center">'+salahChips+'</div>';
   document.getElementById('hp-step1').style.display='none';
   document.getElementById('hp-step2').style.display='block';
   const hpQuotes=[
@@ -1699,17 +1713,18 @@ function submitHP(){
     '"Salat is the key to acceptance of supplication. Supplicate during it and do not be unmindful." — Malfuzat Vol.3',
     '"Allah has ninety-nine names, and He is Al-Mujeeb — The Responsive. Call upon Him in Salat." — Hadith',
   ];
-  const hpQ=hpQuotes[Math.floor(Math.random()*hpQuotes.length)];
   const hpQel=document.getElementById('hp-suc-quote');
-  if(hpQel)hpQel.textContent=hpQ;
+  if(hpQel)hpQel.textContent=hpQuotes[Math.floor(Math.random()*hpQuotes.length)];
   renderAllGrids();renderStats();renderLeaderboard();
 }
+
 function resetHP(){
   document.getElementById('hp-name').value='';
   document.getElementById('hp-name-err').style.display='none';
   document.getElementById('hp-prayer-err').style.display='none';
   document.querySelectorAll('.hp-btn').forEach(b=>b.classList.remove('on'));
   hpSalah=null;
+  hpSalahs=[];
   document.getElementById('hp-step1').style.display='block';
   document.getElementById('hp-step2').style.display='none';
 }
@@ -1991,10 +2006,10 @@ window.sv=function(id,el){
   }
   if(id==='home'){
     setTimeout(()=>{
-      if(!hpSalah){
+      if(!hpSalahs.length){
         const cur=getCurrentSalah();
         const btns=document.querySelectorAll('.hp-btn');
-        btns.forEach(b=>{if(b.textContent.trim()===cur.name){b.click();}});
+        btns.forEach(b=>{if(b.textContent.trim()===cur.name){toggleHP(cur.name,b);}});
       }
       const inp=document.getElementById('hp-name');if(inp)inp.focus();
     },100);
