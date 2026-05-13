@@ -560,12 +560,20 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
     <p class="sec" style="margin-top:0.5rem">Add attendance for a past date</p>
     <div class="date-picker-wrap">
 
-      <div class="date-row">
+      <div class="date-row" style="margin-bottom:1rem">
         <input type="date" id="past-date" max="">
-        <select id="past-salah-sel" style="background:var(--s2);border:0.5px solid var(--bdr);color:var(--txt);border-radius:8px;padding:8px 12px;font-family:'Outfit',sans-serif;font-size:13px;outline:none">
-          <option value="">Select prayer</option>
-          <option>Fajr</option><option>Zuhr</option><option>Asr</option><option>Maghrib</option><option>Isha</option><option>Jumuah</option>
-        </select>
+      </div>
+      <div style="margin-bottom:1rem">
+        <div style="font-size:11px;color:var(--txt2);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">Which prayer(s)? <span style="color:var(--gold3)">(select all that apply)</span></div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px" id="past-prayer-grid">
+          <button class="prayer-sel-btn" onclick="togglePastPrayer('Fajr',this)">Fajr</button>
+          <button class="prayer-sel-btn" onclick="togglePastPrayer('Zuhr',this)">Zuhr</button>
+          <button class="prayer-sel-btn" onclick="togglePastPrayer('Asr',this)">Asr</button>
+          <button class="prayer-sel-btn" onclick="togglePastPrayer('Maghrib',this)">Maghrib</button>
+          <button class="prayer-sel-btn" onclick="togglePastPrayer('Isha',this)">Isha</button>
+          <button class="prayer-sel-btn" onclick="togglePastPrayer('Jumuah',this)" style="border-color:rgba(45,158,107,0.3);color:var(--green2)">Jumuah<br><span style="font-size:9px;opacity:0.7">Friday</span></button>
+        </div>
+        <div id="past-prayer-err" style="font-size:12px;color:var(--red);text-align:center;margin-top:6px;display:none">Please select at least one prayer</div>
       </div>
 
       <div class="field" style="margin-bottom:10px">
@@ -1754,6 +1762,15 @@ function initAsma(){
 // ── PAST DATES ────────────────────────────────────────────────────────────────
 let pastLoc='mosque';
 
+let pastSalahs = []; // multi-select array for past dates
+
+function togglePastPrayer(name,el){
+  const idx=pastSalahs.indexOf(name);
+  if(idx>=0){pastSalahs.splice(idx,1);el.classList.remove('on');}
+  else{pastSalahs.push(name);el.classList.add('on');}
+  document.getElementById('past-prayer-err').style.display='none';
+}
+
 function setPastLoc(val,el){
   pastLoc=val;
   document.getElementById('past-loc-mosque').classList.toggle('on',val==='mosque');
@@ -1762,13 +1779,16 @@ function setPastLoc(val,el){
 
 function submitPast(){
   const dateVal=document.getElementById('past-date').value;
-  const salah=document.getElementById('past-salah-sel').value;
   const rawNames=document.getElementById('past-name').value;
   const errEl=document.getElementById('past-err');
-  const names=rawNames.split(/[\n,]/).map(n=>n.trim()).filter(Boolean);
-  if(!dateVal||!salah||!names.length){
+  const pErr=document.getElementById('past-prayer-err');
+  const names=rawNames.split('\n').concat(rawNames.split(',')).map(n=>n.trim()).filter((n,idx,a)=>n&&a.indexOf(n)===idx);
+  // Validate
+  if(!pastSalahs.length){pErr.style.display='block';return;}
+  pErr.style.display='none';
+  if(!dateVal||!names.length){
     errEl.style.display='block';
-    errEl.textContent='Please fill in date, prayer and at least one name';
+    errEl.textContent=!dateVal?'Please select a date':'Please enter at least one name';
     return;
   }
   if(dateVal===todayKey()){
@@ -1779,15 +1799,21 @@ function submitPast(){
   errEl.style.display='none';
   const day=getDay(dateVal);
   let added=0;
+  // Loop through every combination of name × salah
   names.forEach(name=>{
-    if(!day[salah].find(p=>p.name.toLowerCase()===name.toLowerCase())){
-      const entry={name,role:'Khadim',streak:1,quran:'',location:pastLoc};
-      day[salah].push(entry);
-      attPushWithSync(salah,entry,dateVal);
-      added++;
-    }
+    pastSalahs.forEach(salah=>{
+      if(!day[salah].find(p=>p.name.toLowerCase()===name.toLowerCase())){
+        const entry={name,role:'Khadim',streak:1,quran:'',location:pastLoc};
+        day[salah].push(entry);
+        attPushWithSync(salah,entry,dateVal);
+        added++;
+      }
+    });
   });
   document.getElementById('past-name').value='';
+  // Clear prayer selection
+  pastSalahs=[];
+  document.querySelectorAll('#past-prayer-grid .prayer-sel-btn').forEach(b=>b.classList.remove('on'));
   renderPastHistory();
   renderAllGrids();renderStats();renderLeaderboard();
   const btn=document.querySelector('#v-past .btn-confirm');
@@ -2154,10 +2180,12 @@ window.sv=function(id,el){
     else{renderAdminAttendance();buildWhatsAppLinks();}
   }
   if(id==='past'){
-    // Set max date to yesterday
     const yesterday=new Date();yesterday.setDate(yesterday.getDate()-1);
     const pastInput=document.getElementById('past-date');
     if(pastInput){pastInput.max=yesterday.toISOString().split('T')[0];if(!pastInput.value)pastInput.valueAsDate=yesterday;}
+    // Reset prayer selection on open
+    pastSalahs=[];
+    document.querySelectorAll('#past-prayer-grid .prayer-sel-btn').forEach(b=>b.classList.remove('on'));
     renderPastHistory();
   }
   if(id==='home'){
