@@ -637,22 +637,24 @@ nav{display:flex;justify-content:center;gap:4px;padding:0.9rem 1rem;position:rel
           <div style="font-size:12px;color:var(--txt3)">Check back soon</div>
         </div>
       </div>
-      <div style="text-align:center;margin-top:1.5rem">
-        <button style="font-size:11px;color:var(--txt3);background:none;border:none;cursor:pointer;font-family:'Outfit',sans-serif" onclick="showAdminGate()">Admin access</button>
+      <div style="text-align:center;margin-top:1.5rem;padding-bottom:1rem;border-top:0.5px solid var(--bdr);padding-top:1rem">
+        <button onclick="showAdminGate()" style="padding:8px 20px;background:var(--s2);border:0.5px solid var(--bdr2);color:var(--txt2);border-radius:8px;cursor:pointer;font-family:'Outfit',sans-serif;font-size:12px;transition:all 0.2s" onmouseover="this.style.color='var(--gold)'" onmouseout="this.style.color='var(--txt2)'">
+          Admin Login
+        </button>
       </div>
     </div>
 
-    <!-- Admin gate -->
-    <div id="admin-gate" style="display:none">
-      <div class="admin-gate">
-        <div class="admin-gate-title">Admin Login</div>
-        <div class="admin-gate-sub">Enter the admin password to manage notices</div>
-        <input class="admin-input" type="password" id="admin-pw" placeholder="Password" onkeydown="if(event.key==='Enter')checkAdmin()">
+    <!-- Admin gate — modal overlay -->
+    <div id="admin-gate" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.8);z-index:200;align-items:center;justify-content:center" onclick="if(event.target===this)hideAdminGate()">
+      <div style="background:var(--s1);border:0.5px solid var(--bdr2);border-radius:18px;padding:2rem;width:90%;max-width:380px;text-align:center;position:relative">
+        <button onclick="hideAdminGate()" style="position:absolute;top:1rem;right:1rem;background:var(--s2);border:none;color:var(--txt2);width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:14px">x</button>
+        <div style="font-family:'Amiri',serif;font-size:24px;color:var(--gold);margin-bottom:6px">Admin Login</div>
+        <div style="font-size:13px;color:var(--txt2);margin-bottom:1.5rem">Enter the admin password</div>
+        <input class="admin-input" type="password" id="admin-pw" placeholder="Password" onkeydown="if(event.key==='Enter')checkAdmin()" style="text-align:center;font-size:18px;letter-spacing:4px">
         <br><br>
-        <button class="btn-confirm" style="max-width:200px;margin:0 auto;display:block;padding:11px" onclick="checkAdmin()">Login</button>
-        <div id="admin-pw-err" style="font-size:12px;color:var(--red);margin-top:8px;display:none">Incorrect password</div>
-        <br>
-        <button style="font-size:11px;color:var(--txt3);background:none;border:none;cursor:pointer;font-family:'Outfit',sans-serif" onclick="hideAdminGate()">Cancel</button>
+        <button class="btn-confirm" style="max-width:200px;margin:0 auto;display:block;padding:12px;font-size:15px" onclick="checkAdmin()">Login</button>
+        <div id="admin-pw-err" style="font-size:12px;color:var(--red);margin-top:10px;display:none">Incorrect password — try again</div>
+        <div style="font-size:11px;color:var(--txt3);margin-top:14px">Default password: <strong style="color:var(--gold3)">mka2025</strong></div>
       </div>
     </div>
 
@@ -1415,15 +1417,21 @@ function renderAdminNotices(){
     </div>`).join('');
 }
 
+// ── ADMIN AUTH ──────────────────────────────────────────────────────────────
+const ADMIN_PASS = 'mka2025';
+let adminLoggedIn = false;
+let NOTICES = [];
+
 function showAdminGate(){
-  document.getElementById('public-notices').style.display='none';
   if(adminLoggedIn){showAdminPanel();return;}
-  document.getElementById('admin-gate').style.display='block';
+  const gate=document.getElementById('admin-gate');
+  gate.style.display='flex';
+  document.getElementById('admin-pw').value='';
+  document.getElementById('admin-pw-err').style.display='none';
   setTimeout(()=>{const pw=document.getElementById('admin-pw');if(pw)pw.focus();},100);
 }
 function hideAdminGate(){
   document.getElementById('admin-gate').style.display='none';
-  document.getElementById('public-notices').style.display='block';
 }
 function checkAdmin(){
   const pw=document.getElementById('admin-pw').value;
@@ -1564,6 +1572,7 @@ function logoutAdmin(){
   adminLoggedIn=false;
   document.getElementById('admin-panel').style.display='none';
   document.getElementById('public-notices').style.display='block';
+  renderNotices();
 }
 function addNotice(){
   const tag=document.getElementById('adm-tag').value;
