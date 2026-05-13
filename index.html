@@ -1400,17 +1400,7 @@ Jazakallah Khair`;
     if(cnt)weekLines.push(d.toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'short'})+': '+cnt);
     weekTotal+=cnt;
   }
-  const weekMsg=`Assalamu Alaikum brothers 
-
- MKA Crawley South — Weekly Attendance Summary
-
-${weekLines.join('
-')}
-
-Total this week: ${weekTotal} prayers attended
-
-Keep it up! 
-${window.location.href}`;
+  const weekMsg='Assalamu Alaikum brothers\n\nMKA Crawley South - Weekly Attendance Summary\n\n'+weekLines.join('\n')+'\n\nTotal this week: '+weekTotal+' prayers attended\n\n'+window.location.href;
   const waWeekly=document.getElementById('wa-weekly-link');
   if(waWeekly)waWeekly.href='https://wa.me/?text='+encodeURIComponent(weekMsg);
 }
